@@ -284,5 +284,3 @@ engine.runRenderLoop(() => {
 });
 
 scene.animationTimeScale = 0.5;
-
-Inspector.Show(scene, {});
