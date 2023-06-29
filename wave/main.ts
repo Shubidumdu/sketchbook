@@ -45,13 +45,12 @@ const pointLight = new PointLight(
   scene,
 );
 pointLight.intensity = 0.2;
-// spotLight.shadow
+pointLight.specular = rgbToColor3(255, 253, 221);
 
 const shadowGenerator = new ShadowGenerator(4096, pointLight);
 shadowGenerator.darkness = 0.75;
 shadowGenerator.normalBias = 0.5;
 shadowGenerator.filter = ShadowGenerator.FILTER_PCSS;
-// shadowGenerator.
 
 type FlowOptions = {
   frequency?: number;
@@ -174,18 +173,6 @@ const FLOW_OPTIONS: readonly FlowOptions[] = [
     speed: 0.08,
     color: rgbToColor3(223, 239, 242),
   },
-  // {
-  //   frequency: 0.6,
-  //   translate: Math.PI / 4,
-  //   amplitude: 1.2,
-  //   position: new Vector3(0, -3, -7),
-  //   speed: 0.06,
-  //   color: new Color3(
-  //     0.9490196078431372,
-  //     0.42745098039215684,
-  //     0.23921568627450981,
-  //   ),
-  // },
 ] as const;
 
 const flows = FLOW_OPTIONS.map((options, index) =>
@@ -193,14 +180,18 @@ const flows = FLOW_OPTIONS.map((options, index) =>
 );
 
 engine.runRenderLoop(() => {
+  const fps = Math.round(1000 / engine.getDeltaTime());
+  const speedRatio = fps / 60;
   flows.forEach((flow) => {
     if (flow.position.x < -flow.metadata.cycle) {
       flow.position.x = 0;
     }
-    flow.position.x -= flow.metadata.speed;
+    flow.position.x -= flow.metadata.speed / speedRatio;
   });
   engine.resize();
   scene.render();
 });
+
+scene.animationTimeScale = 0.5;
 
 Inspector.Show(scene, {});
