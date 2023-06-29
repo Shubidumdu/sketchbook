@@ -29,6 +29,12 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./",\
           "packageDependencies": [\
             ["@babylonjs/core", "npm:6.9.0"],\
+            ["@babylonjs/gui", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
+            ["@babylonjs/gui-editor", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
+            ["@babylonjs/inspector", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
+            ["@babylonjs/loaders", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
+            ["@babylonjs/materials", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
+            ["@babylonjs/serializers", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
             ["@types/node", "npm:20.3.2"],\
             ["path", "npm:0.12.7"],\
             ["sass", "npm:1.63.6"],\
@@ -43,6 +49,181 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/@babylonjs-core-npm-6.9.0-e31a25236d-d5c6b29be9.zip/node_modules/@babylonjs/core/",\
           "packageDependencies": [\
             ["@babylonjs/core", "npm:6.9.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@babylonjs/gui", [\
+        ["npm:6.9.0", {\
+          "packageLocation": "./.yarn/cache/@babylonjs-gui-npm-6.9.0-2ec42c61c0-6055e2aae5.zip/node_modules/@babylonjs/gui/",\
+          "packageDependencies": [\
+            ["@babylonjs/gui", "npm:6.9.0"]\
+          ],\
+          "linkType": "SOFT"\
+        }],\
+        ["virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0", {\
+          "packageLocation": "./.yarn/__virtual__/@babylonjs-gui-virtual-15bfc7aa25/0/cache/@babylonjs-gui-npm-6.9.0-2ec42c61c0-6055e2aae5.zip/node_modules/@babylonjs/gui/",\
+          "packageDependencies": [\
+            ["@babylonjs/gui", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
+            ["@babylonjs/core", "npm:6.9.0"],\
+            ["@types/babylonjs__core", null]\
+          ],\
+          "packagePeers": [\
+            "@babylonjs/core",\
+            "@types/babylonjs__core"\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@babylonjs/gui-editor", [\
+        ["npm:6.9.0", {\
+          "packageLocation": "./.yarn/cache/@babylonjs-gui-editor-npm-6.9.0-55552fe06b-9e7bd62b10.zip/node_modules/@babylonjs/gui-editor/",\
+          "packageDependencies": [\
+            ["@babylonjs/gui-editor", "npm:6.9.0"]\
+          ],\
+          "linkType": "SOFT"\
+        }],\
+        ["virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0", {\
+          "packageLocation": "./.yarn/__virtual__/@babylonjs-gui-editor-virtual-1e3735b1f6/0/cache/@babylonjs-gui-editor-npm-6.9.0-55552fe06b-9e7bd62b10.zip/node_modules/@babylonjs/gui-editor/",\
+          "packageDependencies": [\
+            ["@babylonjs/gui-editor", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
+            ["@babylonjs/core", "npm:6.9.0"],\
+            ["@babylonjs/gui", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
+            ["@types/babylonjs__core", null],\
+            ["@types/babylonjs__gui", null],\
+            ["@types/react", null],\
+            ["@types/react-dom", null]\
+          ],\
+          "packagePeers": [\
+            "@babylonjs/core",\
+            "@babylonjs/gui",\
+            "@types/babylonjs__core",\
+            "@types/babylonjs__gui",\
+            "@types/react-dom",\
+            "@types/react"\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@babylonjs/inspector", [\
+        ["npm:6.9.0", {\
+          "packageLocation": "./.yarn/cache/@babylonjs-inspector-npm-6.9.0-c96ecc07c0-0c1a7510ba.zip/node_modules/@babylonjs/inspector/",\
+          "packageDependencies": [\
+            ["@babylonjs/inspector", "npm:6.9.0"]\
+          ],\
+          "linkType": "SOFT"\
+        }],\
+        ["virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0", {\
+          "packageLocation": "./.yarn/__virtual__/@babylonjs-inspector-virtual-f361cadf45/0/cache/@babylonjs-inspector-npm-6.9.0-c96ecc07c0-0c1a7510ba.zip/node_modules/@babylonjs/inspector/",\
+          "packageDependencies": [\
+            ["@babylonjs/inspector", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
+            ["@babylonjs/core", "npm:6.9.0"],\
+            ["@babylonjs/gui", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
+            ["@babylonjs/gui-editor", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
+            ["@babylonjs/loaders", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
+            ["@babylonjs/materials", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
+            ["@babylonjs/serializers", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
+            ["@fortawesome/fontawesome-svg-core", "npm:6.4.0"],\
+            ["@fortawesome/free-regular-svg-icons", "npm:6.4.0"],\
+            ["@fortawesome/free-solid-svg-icons", "npm:6.4.0"],\
+            ["@types/babylonjs__core", null],\
+            ["@types/babylonjs__gui", null],\
+            ["@types/babylonjs__gui-editor", null],\
+            ["@types/babylonjs__loaders", null],\
+            ["@types/babylonjs__materials", null],\
+            ["@types/babylonjs__serializers", null],\
+            ["@types/react", null],\
+            ["@types/react-dom", null]\
+          ],\
+          "packagePeers": [\
+            "@babylonjs/core",\
+            "@babylonjs/gui-editor",\
+            "@babylonjs/gui",\
+            "@babylonjs/loaders",\
+            "@babylonjs/materials",\
+            "@babylonjs/serializers",\
+            "@types/babylonjs__core",\
+            "@types/babylonjs__gui-editor",\
+            "@types/babylonjs__gui",\
+            "@types/babylonjs__loaders",\
+            "@types/babylonjs__materials",\
+            "@types/babylonjs__serializers",\
+            "@types/react-dom",\
+            "@types/react"\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@babylonjs/loaders", [\
+        ["npm:6.9.0", {\
+          "packageLocation": "./.yarn/cache/@babylonjs-loaders-npm-6.9.0-0f0c5ad568-217fc6eb92.zip/node_modules/@babylonjs/loaders/",\
+          "packageDependencies": [\
+            ["@babylonjs/loaders", "npm:6.9.0"]\
+          ],\
+          "linkType": "SOFT"\
+        }],\
+        ["virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0", {\
+          "packageLocation": "./.yarn/__virtual__/@babylonjs-loaders-virtual-407c57eef7/0/cache/@babylonjs-loaders-npm-6.9.0-0f0c5ad568-217fc6eb92.zip/node_modules/@babylonjs/loaders/",\
+          "packageDependencies": [\
+            ["@babylonjs/loaders", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
+            ["@babylonjs/core", "npm:6.9.0"],\
+            ["@types/babylonjs-gltf2interface", null],\
+            ["@types/babylonjs__core", null],\
+            ["babylonjs-gltf2interface", null]\
+          ],\
+          "packagePeers": [\
+            "@babylonjs/core",\
+            "@types/babylonjs-gltf2interface",\
+            "@types/babylonjs__core",\
+            "babylonjs-gltf2interface"\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@babylonjs/materials", [\
+        ["npm:6.9.0", {\
+          "packageLocation": "./.yarn/cache/@babylonjs-materials-npm-6.9.0-15f13bc0d6-3aba0b8ad4.zip/node_modules/@babylonjs/materials/",\
+          "packageDependencies": [\
+            ["@babylonjs/materials", "npm:6.9.0"]\
+          ],\
+          "linkType": "SOFT"\
+        }],\
+        ["virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0", {\
+          "packageLocation": "./.yarn/__virtual__/@babylonjs-materials-virtual-b843e205a2/0/cache/@babylonjs-materials-npm-6.9.0-15f13bc0d6-3aba0b8ad4.zip/node_modules/@babylonjs/materials/",\
+          "packageDependencies": [\
+            ["@babylonjs/materials", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
+            ["@babylonjs/core", "npm:6.9.0"],\
+            ["@types/babylonjs__core", null]\
+          ],\
+          "packagePeers": [\
+            "@babylonjs/core",\
+            "@types/babylonjs__core"\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@babylonjs/serializers", [\
+        ["npm:6.9.0", {\
+          "packageLocation": "./.yarn/cache/@babylonjs-serializers-npm-6.9.0-29d64ab39f-be6c8c2041.zip/node_modules/@babylonjs/serializers/",\
+          "packageDependencies": [\
+            ["@babylonjs/serializers", "npm:6.9.0"]\
+          ],\
+          "linkType": "SOFT"\
+        }],\
+        ["virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0", {\
+          "packageLocation": "./.yarn/__virtual__/@babylonjs-serializers-virtual-5ec06a6273/0/cache/@babylonjs-serializers-npm-6.9.0-29d64ab39f-be6c8c2041.zip/node_modules/@babylonjs/serializers/",\
+          "packageDependencies": [\
+            ["@babylonjs/serializers", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
+            ["@babylonjs/core", "npm:6.9.0"],\
+            ["@types/babylonjs-gltf2interface", null],\
+            ["@types/babylonjs__core", null],\
+            ["babylonjs-gltf2interface", null]\
+          ],\
+          "packagePeers": [\
+            "@babylonjs/core",\
+            "@types/babylonjs-gltf2interface",\
+            "@types/babylonjs__core",\
+            "babylonjs-gltf2interface"\
           ],\
           "linkType": "HARD"\
         }]\
@@ -241,6 +422,45 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/unplugged/@esbuild-win32-x64-npm-0.17.19-619fae7839/node_modules/@esbuild/win32-x64/",\
           "packageDependencies": [\
             ["@esbuild/win32-x64", "npm:0.17.19"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@fortawesome/fontawesome-common-types", [\
+        ["npm:6.4.0", {\
+          "packageLocation": "./.yarn/unplugged/@fortawesome-fontawesome-common-types-npm-6.4.0-8174465a2e/node_modules/@fortawesome/fontawesome-common-types/",\
+          "packageDependencies": [\
+            ["@fortawesome/fontawesome-common-types", "npm:6.4.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@fortawesome/fontawesome-svg-core", [\
+        ["npm:6.4.0", {\
+          "packageLocation": "./.yarn/unplugged/@fortawesome-fontawesome-svg-core-npm-6.4.0-bc7699426e/node_modules/@fortawesome/fontawesome-svg-core/",\
+          "packageDependencies": [\
+            ["@fortawesome/fontawesome-svg-core", "npm:6.4.0"],\
+            ["@fortawesome/fontawesome-common-types", "npm:6.4.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@fortawesome/free-regular-svg-icons", [\
+        ["npm:6.4.0", {\
+          "packageLocation": "./.yarn/unplugged/@fortawesome-free-regular-svg-icons-npm-6.4.0-2f59fc26d1/node_modules/@fortawesome/free-regular-svg-icons/",\
+          "packageDependencies": [\
+            ["@fortawesome/free-regular-svg-icons", "npm:6.4.0"],\
+            ["@fortawesome/fontawesome-common-types", "npm:6.4.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@fortawesome/free-solid-svg-icons", [\
+        ["npm:6.4.0", {\
+          "packageLocation": "./.yarn/unplugged/@fortawesome-free-solid-svg-icons-npm-6.4.0-be633fc4ad/node_modules/@fortawesome/free-solid-svg-icons/",\
+          "packageDependencies": [\
+            ["@fortawesome/free-solid-svg-icons", "npm:6.4.0"],\
+            ["@fortawesome/fontawesome-common-types", "npm:6.4.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -1528,6 +1748,12 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["sketchbook", "workspace:."],\
             ["@babylonjs/core", "npm:6.9.0"],\
+            ["@babylonjs/gui", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
+            ["@babylonjs/gui-editor", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
+            ["@babylonjs/inspector", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
+            ["@babylonjs/loaders", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
+            ["@babylonjs/materials", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
+            ["@babylonjs/serializers", "virtual:d6b46d6479f08354013131fcb51405a7734910be94d406015107d256c0feabbd95bb07dcacf744ed942f30dabebdbe3128e6c7132c63fcbb27e58c26cf16c2f7#npm:6.9.0"],\
             ["@types/node", "npm:20.3.2"],\
             ["path", "npm:0.12.7"],\
             ["sass", "npm:1.63.6"],\
