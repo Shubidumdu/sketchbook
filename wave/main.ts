@@ -1,13 +1,22 @@
 import {
+  Color3,
   FreeCamera,
   HemisphericLight,
   Mesh,
   MeshBuilder,
+  PointLight,
   Scene,
+  ShadowGenerator,
+  SpotLight,
+  StandardMaterial,
+  Texture,
   Vector3,
   WebGPUEngine,
 } from '@babylonjs/core';
 import './style.scss';
+import { SimpleMaterial } from '@babylonjs/materials';
+import { Inspector } from '@babylonjs/inspector';
+import { rgbToColor3 } from '../utils/color';
 
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 const engine = new WebGPUEngine(canvas, {
@@ -19,17 +28,30 @@ await engine.initAsync();
 const scene = new Scene(engine);
 const camera = new FreeCamera('camera', new Vector3(0, 0, -10), scene);
 camera.setTarget(Vector3.Zero());
-camera.attachControl(canvas, true);
 camera.mode = FreeCamera.ORTHOGRAPHIC_CAMERA;
 const rect = engine.getRenderingCanvasClientRect();
-const aspect = rect.height / rect.width;
+// const aspect = rect.height / rect.width;
 camera.orthoLeft = 0;
 camera.orthoRight = 3 * Math.PI;
 camera.orthoBottom = -4;
 camera.orthoTop = 4;
 
-const light = new HemisphericLight('light1', new Vector3(0, 1, 0), scene);
-light.intensity = 1;
+const light = new HemisphericLight('light1', new Vector3(-2, 12, -2), scene);
+light.intensity = 1.25;
+
+const pointLight = new PointLight(
+  'pointLight',
+  new Vector3((Math.PI * 3) / 2, -3, -18),
+  scene,
+);
+pointLight.intensity = 0.2;
+// spotLight.shadow
+
+const shadowGenerator = new ShadowGenerator(4096, pointLight);
+shadowGenerator.darkness = 0.75;
+shadowGenerator.normalBias = 0.5;
+shadowGenerator.filter = ShadowGenerator.FILTER_PCSS;
+// shadowGenerator.
 
 type FlowOptions = {
   frequency?: number;
@@ -37,6 +59,7 @@ type FlowOptions = {
   translate?: number;
   position?: Vector3;
   speed?: number;
+  color?: Color3;
 };
 
 const makeFlow = (name: string, options: FlowOptions = {}) => {
@@ -46,7 +69,9 @@ const makeFlow = (name: string, options: FlowOptions = {}) => {
     amplitude = 1,
     position = new Vector3(0, 0, 0),
     speed = 0.05,
+    color = new Color3(1, 1, 1),
   } = options;
+  console.log(color);
   const cycle = (2 * Math.PI) / frequency;
   const totalLength = camera.orthoRight! + 0.5 * Math.PI + cycle;
   const corners: Vector3[] = [];
@@ -67,12 +92,18 @@ const makeFlow = (name: string, options: FlowOptions = {}) => {
     pathArray: [corners, tops, uppers, bottoms],
     sideOrientation: Mesh.FRONTSIDE,
   });
-  flow.position = position;
+  flow.receiveShadows = true;
 
+  const material = new StandardMaterial('material', scene);
+  material.diffuseColor = color;
+
+  flow.position = position;
   flow.metadata = {
     cycle,
     speed,
   };
+  flow.material = material;
+  shadowGenerator.getShadowMap()?.renderList?.push(flow);
 
   return flow;
 };
@@ -80,6 +111,11 @@ const makeFlow = (name: string, options: FlowOptions = {}) => {
 const plane = MeshBuilder.CreatePlane('plane');
 plane.scaling = new Vector3(100, 100, 100);
 plane.position.z = 1;
+plane.receiveShadows = true;
+
+const material = new SimpleMaterial('materialPlane', scene);
+material.diffuseColor = rgbToColor3(87, 183, 242);
+plane.material = material;
 
 const FLOW_OPTIONS: readonly FlowOptions[] = [
   {
@@ -88,6 +124,7 @@ const FLOW_OPTIONS: readonly FlowOptions[] = [
     amplitude: 0.9,
     position: new Vector3(0, 4, 0),
     speed: 0.05,
+    color: rgbToColor3(223, 239, 242),
   },
   {
     frequency: 1,
@@ -95,6 +132,7 @@ const FLOW_OPTIONS: readonly FlowOptions[] = [
     amplitude: 0.6,
     position: new Vector3(0, 3, -1),
     speed: 0.06,
+    color: rgbToColor3(5, 131, 242),
   },
   {
     frequency: 1,
@@ -102,6 +140,7 @@ const FLOW_OPTIONS: readonly FlowOptions[] = [
     amplitude: 0.8,
     position: new Vector3(0, 2, -2),
     speed: 0.03,
+    color: rgbToColor3(94, 200, 242),
   },
   {
     frequency: 1,
@@ -109,6 +148,7 @@ const FLOW_OPTIONS: readonly FlowOptions[] = [
     amplitude: 0.8,
     position: new Vector3(0, 1, -3),
     speed: 0.06,
+    color: rgbToColor3(223, 239, 242),
   },
   {
     frequency: 1,
@@ -116,6 +156,7 @@ const FLOW_OPTIONS: readonly FlowOptions[] = [
     amplitude: 1,
     position: new Vector3(0, 0, -4),
     speed: 0.07,
+    color: rgbToColor3(87, 183, 242),
   },
   {
     frequency: 1,
@@ -123,6 +164,7 @@ const FLOW_OPTIONS: readonly FlowOptions[] = [
     amplitude: 0.8,
     position: new Vector3(0, -1, -5),
     speed: 0.03,
+    color: rgbToColor3(5, 131, 242),
   },
   {
     frequency: 1,
@@ -130,14 +172,20 @@ const FLOW_OPTIONS: readonly FlowOptions[] = [
     amplitude: 0.6,
     position: new Vector3(0, -2, -6),
     speed: 0.08,
+    color: rgbToColor3(223, 239, 242),
   },
-  {
-    frequency: 0.6,
-    translate: Math.PI / 4,
-    amplitude: 1.2,
-    position: new Vector3(0, -3, -7),
-    speed: 0.06,
-  },
+  // {
+  //   frequency: 0.6,
+  //   translate: Math.PI / 4,
+  //   amplitude: 1.2,
+  //   position: new Vector3(0, -3, -7),
+  //   speed: 0.06,
+  //   color: new Color3(
+  //     0.9490196078431372,
+  //     0.42745098039215684,
+  //     0.23921568627450981,
+  //   ),
+  // },
 ] as const;
 
 const flows = FLOW_OPTIONS.map((options, index) =>
@@ -145,7 +193,6 @@ const flows = FLOW_OPTIONS.map((options, index) =>
 );
 
 engine.runRenderLoop(() => {
-  const time = performance.now();
   flows.forEach((flow) => {
     if (flow.position.x < -flow.metadata.cycle) {
       flow.position.x = 0;
@@ -156,4 +203,4 @@ engine.runRenderLoop(() => {
   scene.render();
 });
 
-// Inspector.Show(scene, {});
+Inspector.Show(scene, {});

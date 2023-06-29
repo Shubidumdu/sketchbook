@@ -9,7 +9,7 @@ export default defineConfig({
       },
     },
   },
-  assetsInclude: ['**/*.glsl'],
+  assetsInclude: ['**/*.glsl', '**/*.hdr'],
   css: {
     preprocessorOptions: {
       scss: {
