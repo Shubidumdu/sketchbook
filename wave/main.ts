@@ -14,7 +14,6 @@ import {
 } from '@babylonjs/core';
 import './style.scss';
 import { SimpleMaterial } from '@babylonjs/materials';
-import { Inspector } from '@babylonjs/inspector';
 import { rgbToColor3 } from '../utils/color';
 
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -28,15 +27,27 @@ const scene = new Scene(engine);
 const camera = new FreeCamera('camera', new Vector3(0, 0, -10), scene);
 camera.setTarget(Vector3.Zero());
 camera.mode = FreeCamera.ORTHOGRAPHIC_CAMERA;
-const rect = engine.getRenderingCanvasClientRect();
-// const aspect = rect.height / rect.width;
-camera.orthoLeft = 0;
-camera.orthoRight = 3 * Math.PI;
-camera.orthoBottom = -4;
-camera.orthoTop = 4;
 
-const light = new HemisphericLight('light1', new Vector3(-2, 12, -2), scene);
-light.intensity = 1.25;
+const rect = engine.getRenderingCanvasClientRect()!;
+const isLandscape = rect.width > rect.height;
+if (isLandscape) {
+  camera.orthoLeft = 0;
+  camera.orthoRight = 3 * Math.PI;
+  camera.orthoBottom = -4;
+  camera.orthoTop = 4;
+} else {
+  camera.orthoLeft = 4;
+  camera.orthoRight = 4 * Math.PI;
+  camera.orthoBottom = -8;
+  camera.orthoTop = 8;
+}
+
+const hemiLight = new HemisphericLight(
+  'hemiLight',
+  new Vector3(-2, 12, -2),
+  scene,
+);
+hemiLight.intensity = 1.25;
 
 const pointLight = new PointLight(
   'pointLight',
@@ -91,7 +102,7 @@ const makeFlow = (name: string, options: FlowOptions = {}) => {
   });
   flow.receiveShadows = true;
 
-  const material = new StandardMaterial('material', scene);
+  const material = new StandardMaterial(`flowMaterial`, scene);
   material.diffuseColor = color;
 
   flow.position = position;
@@ -177,15 +188,15 @@ const flows = FLOW_OPTIONS.map((options, index) =>
   makeFlow(`flow${index + 1}`, options),
 );
 
-const lightAnimation = new Animation(
-  'lightAnimation',
+const hemiLightAnimation = new Animation(
+  'hemiLightAnimation',
   'diffuse',
   16,
   Animation.ANIMATIONTYPE_COLOR3,
   Animation.ANIMATIONLOOPMODE_CYCLE,
 );
 
-lightAnimation.setKeys([
+hemiLightAnimation.setKeys([
   {
     frame: 0,
     value: rgbToColor3(255, 243, 157),
@@ -207,7 +218,7 @@ lightAnimation.setKeys([
     value: rgbToColor3(255, 243, 157),
   },
 ]);
-light.animations = [lightAnimation];
+hemiLight.animations = [hemiLightAnimation];
 
 const pointLightAnimation = new Animation(
   'pointLightAnimation',
@@ -258,22 +269,22 @@ engine.runRenderLoop(() => {
     scene.metadata.targetTime += 8000;
     switch (scene.metadata.period) {
       case 'morning':
-        scene.beginAnimation(light, 0, 4, false, 0.5);
+        scene.beginAnimation(hemiLight, 0, 4, false, 0.5);
         scene.beginAnimation(pointLight, 0, 4, false, 0.5);
         scene.metadata.period = 'midday';
         break;
       case 'midday':
-        scene.beginAnimation(light, 4, 8, false, 0.5);
+        scene.beginAnimation(hemiLight, 4, 8, false, 0.5);
         scene.beginAnimation(pointLight, 4, 8, false, 0.5);
         scene.metadata.period = 'sunset';
         break;
       case 'sunset':
-        scene.beginAnimation(light, 8, 12, false, 0.5);
+        scene.beginAnimation(hemiLight, 8, 12, false, 0.5);
         scene.beginAnimation(pointLight, 8, 12, false, 0.5);
         scene.metadata.period = 'night';
         break;
       case 'night':
-        scene.beginAnimation(light, 12, 16, false, 0.5);
+        scene.beginAnimation(hemiLight, 12, 16, false, 0.5);
         scene.beginAnimation(pointLight, 12, 16, false, 0.5);
         scene.metadata.period = 'morning';
         break;
@@ -282,5 +293,3 @@ engine.runRenderLoop(() => {
   engine.resize();
   scene.render();
 });
-
-scene.animationTimeScale = 0.5;
