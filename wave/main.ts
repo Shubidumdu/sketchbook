@@ -23,7 +23,6 @@ camera.attachControl(canvas, true);
 camera.mode = FreeCamera.ORTHOGRAPHIC_CAMERA;
 const rect = engine.getRenderingCanvasClientRect();
 const aspect = rect.height / rect.width;
-// In this example we'll set the distance based on the camera's radius.
 camera.orthoLeft = 0;
 camera.orthoRight = 3 * Math.PI;
 camera.orthoBottom = -4;
@@ -78,26 +77,66 @@ const makeFlow = (name: string, options: FlowOptions = {}) => {
   return flow;
 };
 
+const plane = MeshBuilder.CreatePlane('plane');
+plane.scaling = new Vector3(100, 100, 100);
+plane.position.z = 1;
+
 const FLOW_OPTIONS: readonly FlowOptions[] = [
   {
     frequency: 1,
-    translate: 1.5,
-    position: new Vector3(0, 0, 0),
+    translate: 0,
+    amplitude: 0.9,
+    position: new Vector3(0, 4, 0),
     speed: 0.05,
   },
   {
     frequency: 1,
-    translate: 1.5,
-    amplitude: 0.5,
-    position: new Vector3(0, 0.5, 0.5),
+    translate: Math.PI,
+    amplitude: 0.6,
+    position: new Vector3(0, 3, -1),
+    speed: 0.06,
+  },
+  {
+    frequency: 1,
+    translate: Math.PI / 3,
+    amplitude: 0.8,
+    position: new Vector3(0, 2, -2),
+    speed: 0.03,
+  },
+  {
+    frequency: 1,
+    translate: Math.PI - 1,
+    amplitude: 0.8,
+    position: new Vector3(0, 1, -3),
+    speed: 0.06,
+  },
+  {
+    frequency: 1,
+    translate: -Math.PI / 2,
+    amplitude: 1,
+    position: new Vector3(0, 0, -4),
     speed: 0.07,
   },
   {
     frequency: 1,
-    translate: -2,
-    amplitude: 1,
-    position: new Vector3(0, -0.5, -0.5),
-    speed: 0.1,
+    translate: 0,
+    amplitude: 0.8,
+    position: new Vector3(0, -1, -5),
+    speed: 0.03,
+  },
+  {
+    frequency: 1,
+    translate: Math.PI,
+    amplitude: 0.6,
+    position: new Vector3(0, -2, -6),
+    speed: 0.08,
+  },
+  {
+    frequency: 0.6,
+    translate: Math.PI / 4,
+    amplitude: 1.2,
+    position: new Vector3(0, -3, -7),
+    speed: 0.06,
   },
 ] as const;
 
@@ -106,6 +145,7 @@ const flows = FLOW_OPTIONS.map((options, index) =>
 );
 
 engine.runRenderLoop(() => {
+  const time = performance.now();
   flows.forEach((flow) => {
     if (flow.position.x < -flow.metadata.cycle) {
       flow.position.x = 0;
