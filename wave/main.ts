@@ -1,4 +1,5 @@
 import {
+  Animation,
   Color3,
   FreeCamera,
   HemisphericLight,
@@ -7,9 +8,7 @@ import {
   PointLight,
   Scene,
   ShadowGenerator,
-  SpotLight,
   StandardMaterial,
-  Texture,
   Vector3,
   WebGPUEngine,
 } from '@babylonjs/core';
@@ -70,7 +69,6 @@ const makeFlow = (name: string, options: FlowOptions = {}) => {
     speed = 0.05,
     color = new Color3(1, 1, 1),
   } = options;
-  console.log(color);
   const cycle = (2 * Math.PI) / frequency;
   const totalLength = camera.orthoRight! + 0.5 * Math.PI + cycle;
   const corners: Vector3[] = [];
@@ -122,7 +120,7 @@ const FLOW_OPTIONS: readonly FlowOptions[] = [
     translate: 0,
     amplitude: 0.9,
     position: new Vector3(0, 4, 0),
-    speed: 0.05,
+    speed: 0.025,
     color: rgbToColor3(223, 239, 242),
   },
   {
@@ -130,7 +128,7 @@ const FLOW_OPTIONS: readonly FlowOptions[] = [
     translate: Math.PI,
     amplitude: 0.6,
     position: new Vector3(0, 3, -1),
-    speed: 0.06,
+    speed: 0.03,
     color: rgbToColor3(5, 131, 242),
   },
   {
@@ -138,7 +136,7 @@ const FLOW_OPTIONS: readonly FlowOptions[] = [
     translate: Math.PI / 3,
     amplitude: 0.8,
     position: new Vector3(0, 2, -2),
-    speed: 0.03,
+    speed: 0.015,
     color: rgbToColor3(94, 200, 242),
   },
   {
@@ -146,7 +144,7 @@ const FLOW_OPTIONS: readonly FlowOptions[] = [
     translate: Math.PI - 1,
     amplitude: 0.8,
     position: new Vector3(0, 1, -3),
-    speed: 0.06,
+    speed: 0.03,
     color: rgbToColor3(223, 239, 242),
   },
   {
@@ -154,7 +152,7 @@ const FLOW_OPTIONS: readonly FlowOptions[] = [
     translate: -Math.PI / 2,
     amplitude: 1,
     position: new Vector3(0, 0, -4),
-    speed: 0.07,
+    speed: 0.035,
     color: rgbToColor3(87, 183, 242),
   },
   {
@@ -162,7 +160,7 @@ const FLOW_OPTIONS: readonly FlowOptions[] = [
     translate: 0,
     amplitude: 0.8,
     position: new Vector3(0, -1, -5),
-    speed: 0.03,
+    speed: 0.015,
     color: rgbToColor3(5, 131, 242),
   },
   {
@@ -170,7 +168,7 @@ const FLOW_OPTIONS: readonly FlowOptions[] = [
     translate: Math.PI,
     amplitude: 0.6,
     position: new Vector3(0, -2, -6),
-    speed: 0.08,
+    speed: 0.04,
     color: rgbToColor3(223, 239, 242),
   },
 ] as const;
@@ -179,8 +177,76 @@ const flows = FLOW_OPTIONS.map((options, index) =>
   makeFlow(`flow${index + 1}`, options),
 );
 
+const lightAnimation = new Animation(
+  'lightAnimation',
+  'diffuse',
+  16,
+  Animation.ANIMATIONTYPE_COLOR3,
+  Animation.ANIMATIONLOOPMODE_CYCLE,
+);
+
+lightAnimation.setKeys([
+  {
+    frame: 0,
+    value: rgbToColor3(255, 243, 157),
+  },
+  {
+    frame: 4,
+    value: rgbToColor3(255, 255, 255),
+  },
+  {
+    frame: 8,
+    value: rgbToColor3(169, 59, 59),
+  },
+  {
+    frame: 12,
+    value: rgbToColor3(8, 31, 11),
+  },
+  {
+    frame: 16,
+    value: rgbToColor3(255, 243, 157),
+  },
+]);
+light.animations = [lightAnimation];
+
+const pointLightAnimation = new Animation(
+  'pointLightAnimation',
+  'diffuse',
+  16,
+  Animation.ANIMATIONTYPE_COLOR3,
+  Animation.ANIMATIONLOOPMODE_CYCLE,
+);
+pointLightAnimation.setKeys([
+  {
+    frame: 0,
+    value: rgbToColor3(255, 243, 157),
+  },
+  {
+    frame: 4,
+    value: rgbToColor3(255, 255, 255),
+  },
+  {
+    frame: 8,
+    value: rgbToColor3(255, 223, 0),
+  },
+  {
+    frame: 12,
+    value: rgbToColor3(115, 137, 255),
+  },
+  {
+    frame: 16,
+    value: rgbToColor3(92, 248, 250),
+  },
+]);
+pointLight.animations = [pointLightAnimation];
+
+scene.metadata = {
+  targetTime: 8000,
+  period: 'midday',
+};
+
 engine.runRenderLoop(() => {
-  const fps = Math.round(1000 / engine.getDeltaTime());
+  const fps = 1000 / engine.getDeltaTime();
   const speedRatio = fps / 60;
   flows.forEach((flow) => {
     if (flow.position.x < -flow.metadata.cycle) {
@@ -188,6 +254,31 @@ engine.runRenderLoop(() => {
     }
     flow.position.x -= flow.metadata.speed / speedRatio;
   });
+  if (performance.now() > scene.metadata.targetTime) {
+    scene.metadata.targetTime += 8000;
+    switch (scene.metadata.period) {
+      case 'morning':
+        scene.beginAnimation(light, 0, 4, false, 0.5);
+        scene.beginAnimation(pointLight, 0, 4, false, 0.5);
+        scene.metadata.period = 'midday';
+        break;
+      case 'midday':
+        scene.beginAnimation(light, 4, 8, false, 0.5);
+        scene.beginAnimation(pointLight, 4, 8, false, 0.5);
+        scene.metadata.period = 'sunset';
+        break;
+      case 'sunset':
+        scene.beginAnimation(light, 8, 12, false, 0.5);
+        scene.beginAnimation(pointLight, 8, 12, false, 0.5);
+        scene.metadata.period = 'night';
+        break;
+      case 'night':
+        scene.beginAnimation(light, 12, 16, false, 0.5);
+        scene.beginAnimation(pointLight, 12, 16, false, 0.5);
+        scene.metadata.period = 'morning';
+        break;
+    }
+  }
   engine.resize();
   scene.render();
 });
