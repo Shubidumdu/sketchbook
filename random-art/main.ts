@@ -6,7 +6,6 @@ import {
   resizeCanvasToDisplaySize,
 } from '../utils/webgl';
 import './style.scss';
-import { matrix3 } from '../utils/math';
 
 const canvas = document.querySelector('canvas')!;
 const gl = canvas.getContext('webgl2');
@@ -39,20 +38,7 @@ const draw = (time: number) => {
   gl.viewport(0, 0, canvas.width, canvas.height);
   gl.bufferData(
     gl.ARRAY_BUFFER,
-    new Float32Array([
-      -canvas.width,
-      -canvas.height,
-      canvas.width,
-      -canvas.height,
-      -canvas.width,
-      canvas.height,
-      -canvas.width,
-      canvas.height,
-      canvas.width,
-      -canvas.height,
-      canvas.width,
-      canvas.height,
-    ]),
+    new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]),
     gl.STATIC_DRAW,
   );
   gl.uniform2fv(resolutionLocation, [canvas.width, canvas.height]);
