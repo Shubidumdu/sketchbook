@@ -5,10 +5,10 @@ __metadata:
   version: 6
   cacheKey: 8
 
-"@babylonjs/core@npm:^6.9.0":
-  version: 6.9.0
-  resolution: "@babylonjs/core@npm:6.9.0"
-  checksum: d5c6b29be939b1fd82638b10974f38aadb62fb1fb78e007e7b9a6471faf60ab8f1584d83d81761a602d021e2554d24dcef8436fee6ab684b339dde46f2d42614
+"@babylonjs/core@npm:^6.11.2":
+  version: 6.11.2
+  resolution: "@babylonjs/core@npm:6.11.2"
+  checksum: b265cefb8133accf3eaf34020a63b0ca8ceea0c8d1af22bd6b6f9587e62719706a98d764c04a117b6f26ff0f5f1ebd5b5765c326ad30e66ac4721819b2492061
   languageName: node
   linkType: hard
 
@@ -1465,7 +1465,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "sketchbook@workspace:."
   dependencies:
-    "@babylonjs/core": ^6.9.0
+    "@babylonjs/core": ^6.11.2
     "@babylonjs/gui": ^6.6.0
     "@babylonjs/gui-editor": ^6.6.0
     "@babylonjs/inspector": ^6.6.0
