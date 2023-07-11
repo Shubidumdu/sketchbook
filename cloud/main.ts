@@ -36,15 +36,15 @@ context.configure({
 
 const encoder = device.createCommandEncoder();
 
-const pass = encoder.beginRenderPass({
+const renderPassDescriptor = {
   colorAttachments: [
     {
       view: context.getCurrentTexture().createView(),
-      loadOp: 'clear',
-      storeOp: 'store',
+      loadOp: 'clear' as const,
+      storeOp: 'store' as const,
     },
   ],
-});
+};
 
 const vertices = new Float32Array([-1, -1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1]);
 
@@ -92,10 +92,37 @@ const cloudPipeline = device.createRenderPipeline({
   },
 });
 
-pass.setPipeline(cloudPipeline);
-pass.setVertexBuffer(0, vertexBuffer);
-pass.draw(vertices.length / 2);
+const UNIFORM_BUFFER_SIZE = 1 * 4;
 
-pass.end();
+const uniformBufer = device.createBuffer({
+  size: UNIFORM_BUFFER_SIZE,
+  usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+  mappedAtCreation: false,
+});
 
-device.queue.submit([encoder.finish()]);
+const uniformValues = new Float32Array(UNIFORM_BUFFER_SIZE / 4);
+
+const bindGroup = device.createBindGroup({
+  label: 'Cloud bind group',
+  layout: cloudPipeline.getBindGroupLayout(0),
+  entries: [{ binding: 0, resource: { buffer: uniformBufer } }],
+});
+
+const render = (time: number) => {
+  renderPassDescriptor.colorAttachments[0].view = context
+    .getCurrentTexture()
+    .createView();
+  const encoder = device.createCommandEncoder();
+  const pass = encoder.beginRenderPass(renderPassDescriptor);
+  uniformValues.set([time], 0); // time
+  device.queue.writeBuffer(uniformBufer, 0, uniformValues);
+  pass.setPipeline(cloudPipeline);
+  pass.setBindGroup(0, bindGroup);
+  pass.setVertexBuffer(0, vertexBuffer);
+  pass.draw(vertices.length / 2);
+  pass.end();
+  device.queue.submit([encoder.finish()]);
+  requestAnimationFrame(render);
+};
+
+requestAnimationFrame(render);

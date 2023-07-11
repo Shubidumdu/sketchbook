@@ -13,8 +13,14 @@ fn vertexMain(v: VSInput) -> VSOutput {
   return vsOut;
 }
 
+struct Uniforms {
+  time: f32,
+}
+
+@group(0) @binding(0) var<uniform> uniforms: Uniforms;
+
 @fragment
 fn fragmentMain(f: VSOutput) -> @location(0) vec4f {
-  var color = vec4f(1, 0, 0, 1);
+  var color = vec4f(0.5 + 0.5 * cos(uniforms.time / 1000), 0, 0, 1);
   return color;
 }
