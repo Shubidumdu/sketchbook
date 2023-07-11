@@ -1,4 +1,4 @@
-// import '@webgpu/types';
+import shader from './shader.wgsl?raw';
 import './style.scss';
 import { resizeCanvasToDisplaySize } from '../utils/webgl';
 
@@ -41,11 +41,60 @@ const pass = encoder.beginRenderPass({
     {
       view: context.getCurrentTexture().createView(),
       loadOp: 'clear',
-      clearValue: { r: 0, g: 0.2, b: 0.4, a: 1 }, // New line
       storeOp: 'store',
     },
   ],
 });
+
+const vertices = new Float32Array([-1, -1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1]);
+
+const vertexBuffer = device.createBuffer({
+  label: 'vertices',
+  size: vertices.byteLength,
+  usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+  mappedAtCreation: false,
+});
+
+device.queue.writeBuffer(vertexBuffer, 0, vertices);
+
+const vertexBufferLayout = {
+  arrayStride: 8,
+  attributes: [
+    {
+      format: 'float32x2' as const,
+      offset: 0,
+      shaderLocation: 0, // Position, see vertex shader
+    },
+  ],
+};
+
+const cloudShaderModule = device.createShaderModule({
+  label: 'Cloud shader',
+  code: shader,
+});
+
+const cloudPipeline = device.createRenderPipeline({
+  label: 'Cloud pipeline',
+  layout: 'auto',
+  vertex: {
+    module: cloudShaderModule,
+    entryPoint: 'vertexMain',
+    buffers: [vertexBufferLayout],
+  },
+  fragment: {
+    module: cloudShaderModule,
+    entryPoint: 'fragmentMain',
+    targets: [
+      {
+        format: canvasFormat,
+      },
+    ],
+  },
+});
+
+pass.setPipeline(cloudPipeline);
+pass.setVertexBuffer(0, vertexBuffer);
+pass.draw(vertices.length / 2);
 
 pass.end();
 
