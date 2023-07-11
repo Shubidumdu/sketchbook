@@ -2,7 +2,13 @@ import shader from './shader.wgsl?raw';
 import './style.scss';
 import { resizeCanvasToDisplaySize } from '../utils/webgl';
 
+type MousePosition = {
+  x: number;
+  y: number;
+};
+
 const canvas = document.querySelector('canvas')!;
+let mousePosition: MousePosition | null = null;
 
 resizeCanvasToDisplaySize(canvas);
 
@@ -33,8 +39,6 @@ context.configure({
   device: device,
   format: canvasFormat,
 });
-
-const encoder = device.createCommandEncoder();
 
 const renderPassDescriptor = {
   colorAttachments: [
@@ -92,7 +96,7 @@ const cloudPipeline = device.createRenderPipeline({
   },
 });
 
-const UNIFORM_BUFFER_SIZE = 1 * 4;
+const UNIFORM_BUFFER_SIZE = 2 * 4 + 2 * 4 + 2 * 4;
 
 const uniformBufer = device.createBuffer({
   size: UNIFORM_BUFFER_SIZE,
@@ -114,9 +118,11 @@ const render = (time: number) => {
     .createView();
   const encoder = device.createCommandEncoder();
   const pass = encoder.beginRenderPass(renderPassDescriptor);
-  uniformValues.set([time], 0); // time
-  device.queue.writeBuffer(uniformBufer, 0, uniformValues);
   pass.setPipeline(cloudPipeline);
+  uniformValues.set([time], 0); // time
+  uniformValues.set([canvas.width, canvas.height], 2); // resolution
+  uniformValues.set([mousePosition?.x || 0, mousePosition?.y || 0], 4); // mouse
+  device.queue.writeBuffer(uniformBufer, 0, uniformValues);
   pass.setBindGroup(0, bindGroup);
   pass.setVertexBuffer(0, vertexBuffer);
   pass.draw(vertices.length / 2);
@@ -126,3 +132,15 @@ const render = (time: number) => {
 };
 
 requestAnimationFrame(render);
+
+window.addEventListener('pointermove', (e) => {
+  const dpr = window.devicePixelRatio;
+  const clientX = e.clientX * dpr;
+  const clientY = e.clientY * dpr;
+  if (!mousePosition) {
+    mousePosition = { x: clientX, y: clientY };
+  } else {
+    mousePosition.x = clientX;
+    mousePosition.y = clientY;
+  }
+});
