@@ -9,7 +9,7 @@ struct VSOutput {
 @vertex
 fn vertexMain(in: VSInput) -> VSOutput {
   var vsOut: VSOutput;
-  vsOut.pos = vec4f(in.pos, 0, 1);
+  vsOut.pos = vec4f(in.pos, 1, 1);
   return vsOut;
 }
 
@@ -29,12 +29,25 @@ const CYAN = vec3f(0.01176470588, 0.75686274509, 0.9294117647);
 
 @fragment
 fn fragmentMain(in: VSOutput) -> @location(0) vec4f {
-  let st = in.pos.xy / uniforms.resolution;
+  let matrix = trs(uniforms.resolution);
+  let st = (matrix * in.pos.xyz).xy / uniforms.resolution;
   let mouseSt = uniforms.mouse / uniforms.resolution;
   var color = vec3f(0, 0, 0);
   color += eye(st);
 
   return vec4f(color, 1);
+}
+
+fn trs(res: vec2f) -> mat3x3f {
+  if (res.x > res.y) {
+    var scale = res.x / res.y;
+    var translate = (res.x - res.y) * scale / 2;
+    return mat3x3f(scale, 0, 0, 0, 1, 0, -translate, 0, 1);
+  } else {
+    var scale = res.y / res.x;
+    var translate = (res.y - res.x) * scale / 2;
+    return mat3x3f(1, 0, 0, 0, scale, 0, 0, -translate, 1);
+  }
 }
 
 fn circle(st: vec2f, p: vec2f, r: f32) -> f32 {
@@ -56,6 +69,7 @@ fn eye(st: vec2f) -> vec3f {
   color *= (1 - outerPupil * (smoothstep(.115, .125, distance(st, vec2f(.75, .3))) * smoothstep(.115, .125, distance(st, vec2f(.25, .3))))) * light;
   color += innerPupil * vec3f(.12) * light;
   color += highLight * vec3f(1);
+  // color *= mat3f(1, 0, 0, 0, .5, 0, 0, 0, 1);
   return color;
 }
 

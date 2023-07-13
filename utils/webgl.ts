@@ -50,6 +50,7 @@ export const createProgram = (
 };
 
 export const resizeCanvasToDisplaySize = (canvas: HTMLCanvasElement) => {
+  const dpr = window.devicePixelRatio;
   const { width, height } = canvas.getBoundingClientRect();
   const displayWidth = Math.round(width);
   const displayHeight = Math.round(height);
@@ -58,8 +59,8 @@ export const resizeCanvasToDisplaySize = (canvas: HTMLCanvasElement) => {
     canvas.width !== displayWidth || canvas.height !== displayHeight;
 
   if (needResize) {
-    canvas.width = displayWidth;
-    canvas.height = displayHeight;
+    canvas.width = displayWidth * dpr;
+    canvas.height = displayHeight * dpr;
   }
 
   return needResize;
