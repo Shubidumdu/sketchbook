@@ -21,8 +21,8 @@ struct Uniforms {
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
 
-const SCALE = 2;
 const FBM_NUM_OCTAVES = 8;
+const SCALE = 2;
 const PURPLE = vec3f(0.38823529411, 0.13333333333, 0.58039215686);
 const PINK = vec3f(0.40823529411, 0.2333333333, 0.58039215686);
 const CYAN = vec3f(0.01176470588, 0.75686274509, 0.9294117647);
@@ -33,14 +33,15 @@ const NOSE = vec3f(0.10588235294, 0.1294117647, 0.45098039215);
 fn fragmentMain(in: VSOutput) -> @location(0) vec4f {
   let matrix = trs(uniforms.resolution);
   let st = (matrix * in.pos.xyz).xy / uniforms.resolution;
-  let mouseSt = uniforms.mouse / uniforms.resolution;
+  let mouseSt = (matrix * vec3f(uniforms.mouse, 1.)).xy / uniforms.resolution;
   var color = vec3f(0, 0, 0);
-  color += eye(st);
+  color += eye(st, mouseSt);
   color += mouth(st);
   color += (
         (1 - (circle(st, vec2f(.75, .3), .15) + circle(st, vec2f(.25, .3), .15))) 
         * (1 - circle(st, vec2f(.5, .5), .125))
       ) * CYAN;
+  // color += circle(st, mouseSt, .05) * vec3f(1);
   return vec4f(color, 1);
 }
 
@@ -60,22 +61,28 @@ fn circle(st: vec2f, p: vec2f, r: f32) -> f32 {
   return 1 - smoothstep(r - .001, r + .001, length(st - p));
 }
 
-fn eye(st: vec2f) -> vec3f {
+fn eyePosition(mouseSt: vec2f, center: vec2f, limit: f32) -> vec2f {
+  let dist = length(mouseSt - center);
+  if (dist > limit) {
+    let n = normalize(mouseSt - center);
+    let p = center + n * limit;
+    return p;
+  } else {
+    return mouseSt;
+  }
+}
+
+fn eye(st: vec2f, mouseSt: vec2f) -> vec3f {
   let eyeHole = circle(st, vec2f(.75, .3), .15) + circle(st, vec2f(.25, .3), .15);
-  let outerPupil = circle(st, vec2f(.75, .3), .125) + circle(st, vec2f(.25, .3), .125);
-  let innerPupil = circle(st, vec2f(.75, .3), .08) + circle(st, vec2f(.25, .3), .08);
-  let light = (1 - min(.5, length(st - vec2f(.8, .325)) * 2)) * 1.5 * (1 - min(.5, length(st - vec2f(.35, .325)) * 2)) * 1.5;
-  let highLight = circle(st, vec2f(.81, .35), .02) + circle(st, vec2f(.31, .35), .02);
+  let outerPupil = circle(st, eyePosition(mouseSt, vec2f(.75, .3), .035), .115) + circle(st, eyePosition(mouseSt, vec2f(.25, .3), .035), .115);
+  let innerPupil = circle(st, eyePosition(mouseSt, vec2f(.75, .3), .0375), .08) + circle(st, eyePosition(mouseSt, vec2f(.25, .3), .0375), .08);
+  let highLight = circle(st, eyePosition(mouseSt, vec2f(.75, .3), .0375) + vec2f(.06, .05), .02) 
+                + circle(st, eyePosition(mouseSt, vec2f(.25, .3), .0375) + vec2f(.06, .05), .02);
   let f = fbm(st * 5.0);
   let f2 = fbm(st + f + uniforms.time * 0.0001);
   var color = vec3f(0);
-  // color += (eyeHole * (1 - outerPupil)) * vec3f(1) * light;
   color += (eyeHole * (1 - outerPupil)) * vec3f(1);
-  // color += (outerPupil * (1 - innerPupil)) * (PURPLE * light * f * 2 + vec3f(1.) * f2 * f2 * f);
   color += (outerPupil * (1 - innerPupil)) * PURPLE;
-  // color += (outerPupil * (1 - innerPupil)) * sin(noise(st * 1200)) * vec3f(.5) * .4;
-  // color *= (1 - outerPupil * (smoothstep(.115, .125, distance(st, vec2f(.75, .3))) * smoothstep(.115, .125, distance(st, vec2f(.25, .3))))) * light;
-  // color += innerPupil * vec3f(.12) * light;
   color += highLight * vec3f(1);
   return color;
 }
@@ -90,7 +97,7 @@ fn teeth(st: vec2f) -> vec3f {
 }
 
 fn mouth(st: vec2f) -> vec3f {
-  let highLight = circle(st, vec2f(.53, .4425), .01) + circle(st, vec2f(.31, .35), .02);
+  let highLight = circle(st, vec2f(.53, .4425), .01);
   let mouth = circle(st, vec2f(.5, .5), .125);
   let nose = circle(st * vec2f(.8, 1.), vec2f(.5, .44) * vec2f(.8, 1.), .05);
   let arc = smoothstep(1., 1.05, sqrt(sin(st.x * 24 + .5)) - st.y * 26 + 13.75) 
