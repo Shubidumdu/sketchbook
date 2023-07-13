@@ -90,7 +90,7 @@ fn teeth(st: vec2f) -> vec3f {
 }
 
 fn mouth(st: vec2f) -> vec3f {
-  let light = (1 - min(.5, length(st - vec2f(.8, .325)) * 2)) * 1.5 * (1 - min(.5, length(st - vec2f(.35, .325)) * 2)) * 1.5;
+  let highLight = circle(st, vec2f(.53, .4425), .01) + circle(st, vec2f(.31, .35), .02);
   let mouth = circle(st, vec2f(.5, .5), .125);
   let nose = circle(st * vec2f(.8, 1.), vec2f(.5, .44) * vec2f(.8, 1.), .05);
   let arc = smoothstep(1., 1.05, sqrt(sin(st.x * 24 + .5)) - st.y * 26 + 13.75) 
@@ -102,11 +102,12 @@ fn mouth(st: vec2f) -> vec3f {
             * teeth(st * 10 - vec2f(5, 5.5)) * step(.0, -.49 + st.y);
   let teethLine = (smoothstep(.501, .502, st.x) - smoothstep(.504, .505, st.x)) * step(.0, -.492 + st.y);
   var color = vec3f(0);
-  color += (mouth * (1 - nose) * (1 - arc) * (1 - teeth)) * MOUTH * light;
-  color += (mouth * (1 - nose) * (1 - teeth)) * arc * (MOUTH - .4) * light * .8;
-  color += nose * NOSE * light;
+  color += (mouth * (1 - nose) * (1 - arc) * (1 - teeth)) * MOUTH;
+  color += (mouth * (1 - nose) * (1 - teeth)) * arc * (MOUTH - .4) * .8;
+  color += nose * NOSE;
   color += (teeth * (1 - teethLine)) * vec3f(1);
-  color += teeth * teethLine * vec3f(.3) * CYAN;
+  color += teeth * teethLine * vec3f(.85);
+  color += highLight * vec3f(1);
   return color;
 }
 
