@@ -37,7 +37,10 @@ fn fragmentMain(in: VSOutput) -> @location(0) vec4f {
   var color = vec3f(0, 0, 0);
   color += eye(st);
   color += mouth(st);
-
+  color += (
+        (1 - (circle(st, vec2f(.75, .3), .15) + circle(st, vec2f(.25, .3), .15))) 
+        * (1 - circle(st, vec2f(.5, .5), .125))
+      ) * CYAN;
   return vec4f(color, 1);
 }
 
@@ -66,11 +69,13 @@ fn eye(st: vec2f) -> vec3f {
   let f = fbm(st * 5.0);
   let f2 = fbm(st + f + uniforms.time * 0.0001);
   var color = vec3f(0);
-  color += (eyeHole * (1 - outerPupil)) * vec3f(1) * light;
-  color += (outerPupil * (1 - innerPupil)) * (PURPLE * light * f * 2 + vec3f(1.) * f2 * f2 * f);
-  color += (outerPupil * (1 - innerPupil)) * sin(noise(st * 1200)) * vec3f(.5) * .4;
-  color *= (1 - outerPupil * (smoothstep(.115, .125, distance(st, vec2f(.75, .3))) * smoothstep(.115, .125, distance(st, vec2f(.25, .3))))) * light;
-  color += innerPupil * vec3f(.12) * light;
+  // color += (eyeHole * (1 - outerPupil)) * vec3f(1) * light;
+  color += (eyeHole * (1 - outerPupil)) * vec3f(1);
+  // color += (outerPupil * (1 - innerPupil)) * (PURPLE * light * f * 2 + vec3f(1.) * f2 * f2 * f);
+  color += (outerPupil * (1 - innerPupil)) * PURPLE;
+  // color += (outerPupil * (1 - innerPupil)) * sin(noise(st * 1200)) * vec3f(.5) * .4;
+  // color *= (1 - outerPupil * (smoothstep(.115, .125, distance(st, vec2f(.75, .3))) * smoothstep(.115, .125, distance(st, vec2f(.25, .3))))) * light;
+  // color += innerPupil * vec3f(.12) * light;
   color += highLight * vec3f(1);
   return color;
 }
@@ -79,7 +84,7 @@ fn teeth(st: vec2f) -> vec3f {
   if (st.x > 1. || st.x < -1.) {
     return vec3f(0);
   } else {
-    let teeth = smoothstep(0, .05, cos(pow(st.x, 2) * 2) - st.y);
+    let teeth = smoothstep(0, .05, cos(pow(st.x, 2) * 2) * .6 - st.y - .1);
     return teeth * vec3f(1);
   }
 }
