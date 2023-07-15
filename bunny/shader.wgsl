@@ -40,8 +40,9 @@ fn fragmentMain(in: VSOutput) -> @location(0) vec4f {
   color += (
         (1 - (circle(st, vec2f(.75, .3), .15) + circle(st, vec2f(.25, .3), .15))) 
         * (1 - circle(st, vec2f(.5, .5), .125))
+        + eyelid(st)
       ) * CYAN;
-  // color += circle(st, mouseSt, .05) * vec3f(1);
+  color -= eyebrow(st, vec2f(0)) * vec3f(1);
   return vec4f(color, 1);
 }
 
@@ -55,6 +56,26 @@ fn trs(res: vec2f) -> mat3x3f {
     var translate = (res.y - res.x) * scale / 2;
     return mat3x3f(1, 0, 0, 0, scale, 0, 0, -translate, 1);
   }
+}
+
+fn eyelid(st: vec2f) -> f32 {
+  let t = max(min((sin(uniforms.time * .0005)) * 24, 1), 0);
+  let eyeHole = circle(st, vec2f(.75, .3), .15) + circle(st, vec2f(.25, .3), .15);
+  let bottom = smoothstep(0, -.0002, pow(st.x - .75, 2) + pow((st.y - .3) * 3. * t, 2) - pow(.15, 2))
+              + smoothstep(0, -.0002, pow(st.x - .25, 2) + pow((st.y - .3) * 3. * t, 2) - pow(.15, 2));
+return eyeHole * (1 - bottom) * select(0., 1., st.y < .3);
+}
+
+fn eyebrow(st: vec2f, h: vec2f) -> f32 {
+  let thickness = .02;
+  let t = max(min((sin(uniforms.time * .0005)) * 24, 1), .34);
+  let smaller = smoothstep(0, -.0002, pow(st.x - .75, 2) + pow((st.y - .3) * 3. * t, 2) - pow(.15, 2))
+                + smoothstep(0, -.0002, pow(st.x - .25, 2) + pow((st.y - .3) * 3. * t, 2) - pow(.15, 2));
+  let bigger = smoothstep(0, -.0002, pow(st.x - .75 - thickness, 2) + pow((st.y - .3) * 3. * t, 2) - pow(.15 + thickness, 2))
+                + smoothstep(0, -.0002, pow(st.x - .25 + thickness, 2) + pow((st.y - .3) * 3 * t, 2) - pow(.15 + thickness, 2));
+  return bigger * (1 - smaller) *
+    smoothstep(0., .0002, (t - 1.34) * (st.x - .9) - (st.y - .3)) * smoothstep(0., .0002, (1.34 - t) * (st.x - .1) - (st.y - .3))
+    * select(0., 1., st.y < .3);
 }
 
 fn circle(st: vec2f, p: vec2f, r: f32) -> f32 {
@@ -73,17 +94,16 @@ fn eyePosition(mouseSt: vec2f, center: vec2f, limit: f32) -> vec2f {
 }
 
 fn eye(st: vec2f, mouseSt: vec2f) -> vec3f {
+  let eyelid = eyelid(st);
   let eyeHole = circle(st, vec2f(.75, .3), .15) + circle(st, vec2f(.25, .3), .15);
   let outerPupil = circle(st, eyePosition(mouseSt, vec2f(.75, .3), .035), .115) + circle(st, eyePosition(mouseSt, vec2f(.25, .3), .035), .115);
   let innerPupil = circle(st, eyePosition(mouseSt, vec2f(.75, .3), .0375), .08) + circle(st, eyePosition(mouseSt, vec2f(.25, .3), .0375), .08);
   let highLight = circle(st, eyePosition(mouseSt, vec2f(.75, .3), .0375) + vec2f(.06, .05), .02) 
                 + circle(st, eyePosition(mouseSt, vec2f(.25, .3), .0375) + vec2f(.06, .05), .02);
-  let f = fbm(st * 5.0);
-  let f2 = fbm(st + f + uniforms.time * 0.0001);
   var color = vec3f(0);
-  color += (eyeHole * (1 - outerPupil)) * vec3f(1);
-  color += (outerPupil * (1 - innerPupil)) * PURPLE;
-  color += highLight * vec3f(1);
+  color += (eyeHole * (1 - outerPupil) * (1 - eyelid)) * vec3f(1);
+  color += (outerPupil * (1 - innerPupil) * (1 - eyelid)) * PURPLE;
+  color += highLight * (1 - eyelid) * vec3f(1);
   return color;
 }
 
@@ -131,23 +151,4 @@ fn noise(st: vec2f) -> f32 {
   let d = random(i + vec2f(1, 1));
   let u = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
   return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
-}
-
-fn fbm(_st: vec2f) -> f32 {
-  var value = 0.0;
-  var amplitude = .5;
-  var st = _st;
-  for (var i = 0; i < FBM_NUM_OCTAVES; i = i + 1) {
-    value += amplitude * noise(st);
-    st = rotate(st * 4.0, .5);
-    amplitude *= 0.5;
-  }
-  return value;
-}
-
-fn rotate(_st: vec2f, _angle: f32) -> vec2f {
-  let ca = cos(_angle);
-  let sa = sin(_angle);
-  let st = vec2f(ca * _st.x - sa * _st.y, sa * _st.x + ca * _st.y);
-  return st;
 }
