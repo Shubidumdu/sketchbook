@@ -61,20 +61,20 @@ fn trs(res: vec2f) -> mat3x3f {
 fn eyelid(st: vec2f) -> f32 {
   let t = max(min((sin(uniforms.time * .0005)) * 24, 1), 0);
   let eyeHole = circle(st, vec2f(.75, .3), .15) + circle(st, vec2f(.25, .3), .15);
-  let bottom = smoothstep(0, -.0002, pow(st.x - .75, 2) + pow((st.y - .3) * 3. * t, 2) - pow(.15, 2))
-              + smoothstep(0, -.0002, pow(st.x - .25, 2) + pow((st.y - .3) * 3. * t, 2) - pow(.15, 2));
+  let bottom = smoothstep(.0002, -.0002, pow(st.x - .75, 2) + pow((st.y - .3) * 3. * t, 2) - pow(.15, 2))
+              + smoothstep(.0002, -.0002, pow(st.x - .25, 2) + pow((st.y - .3) * 3. * t, 2) - pow(.15, 2));
 return eyeHole * (1 - bottom) * select(0., 1., st.y < .3);
 }
 
 fn eyebrow(st: vec2f, h: vec2f) -> f32 {
   let thickness = .02;
   let t = max(min((sin(uniforms.time * .0005)) * 24, 1), .34);
-  let smaller = smoothstep(0, -.0002, pow(st.x - .75, 2) + pow((st.y - .3) * 3. * t, 2) - pow(.15, 2))
-                + smoothstep(0, -.0002, pow(st.x - .25, 2) + pow((st.y - .3) * 3. * t, 2) - pow(.15, 2));
-  let bigger = smoothstep(0, -.0002, pow(st.x - .75 - thickness, 2) + pow((st.y - .3) * 3. * t, 2) - pow(.15 + thickness, 2))
-                + smoothstep(0, -.0002, pow(st.x - .25 + thickness, 2) + pow((st.y - .3) * 3 * t, 2) - pow(.15 + thickness, 2));
+  let smaller = smoothstep(.0002, -.0002, pow(st.x - .75, 2) + pow((st.y - .3) * 3. * t, 2) - pow(.15, 2))
+                + smoothstep(.0002, -.0002, pow(st.x - .25, 2) + pow((st.y - .3) * 3. * t, 2) - pow(.15, 2));
+  let bigger = smoothstep(.0002, -.0002, pow(st.x - .75 - thickness, 2) + pow((st.y - .3) * 3. * t, 2) - pow(.15 + thickness, 2))
+                + smoothstep(.0002, -.0002, pow(st.x - .25 + thickness, 2) + pow((st.y - .3) * 3 * t, 2) - pow(.15 + thickness, 2));
   return bigger * (1 - smaller) *
-    smoothstep(0., .0002, (t - 1.34) * (st.x - .9) - (st.y - .3)) * smoothstep(0., .0002, (1.34 - t) * (st.x - .1) - (st.y - .3))
+    smoothstep(-.0002, .0002, (t - 1.34) * (st.x - .9) - (st.y - .3)) * smoothstep(-.0002, .0002, (1.34 - t) * (st.x - .1) - (st.y - .3))
     * select(0., 1., st.y < .3);
 }
 
@@ -136,19 +136,4 @@ fn mouth(st: vec2f) -> vec3f {
   color += teeth * teethLine * vec3f(.85);
   color += highLight * vec3f(1);
   return color;
-}
-
-fn random(st: vec2f) -> f32 {
-  return fract(sin(dot(st.xy, vec2f(12.9898,78.233))) * 43758.5453123);
-}
-
-fn noise(st: vec2f) -> f32 {
-  let i = floor(st);
-  let f = fract(st);
-  let a = random(i);
-  let b = random(i + vec2f(1, 0));
-  let c = random(i + vec2f(0, 1));
-  let d = random(i + vec2f(1, 1));
-  let u = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
-  return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
 }
