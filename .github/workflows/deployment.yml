@@ -19,7 +19,7 @@ jobs:
           cmd: install
       - uses: borales/actions-yarn@v4
         with:
-          cmd: build
+          cmd: build:gh-pages
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v1.0.7
         with:
