@@ -7,8 +7,8 @@ document.body.innerHTML = `
   <ul class="page-list">
     ${pageNames.map((page) => `
       <li>
-        <a href="/pages/${page}/">
-          <img src="/thumbnails/${page}.png" alt="${page}">
+        <a href="./pages/${page}/">
+          <img src="./thumbnails/${page}.png" alt="${page}">
           <span>${parse(page)}</span>
         </a>
       </li>
