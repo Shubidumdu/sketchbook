@@ -59,7 +59,7 @@ fn trs(res: vec2f) -> mat3x3f {
 }
 
 fn eyelid(st: vec2f) -> f32 {
-  let t = max(min((sin(uniforms.time * .0005 - 3.14)) * 24, 1), 0);
+  let t = max(min((sin(2 * uniforms.time * .0005 - 2.) + sin(3 * uniforms.time * .0005 - 8.) + sin(uniforms.time * .0005 - 8.)) * 4, 1), .34);
   let eyeHole = circle(st, vec2f(.75, .3), .15) + circle(st, vec2f(.25, .3), .15);
   let bottom = smoothstep(.0002, -.0002, pow(st.x - .75, 2) + pow((st.y - .3) * 3. * t, 2) - pow(.15, 2))
               + smoothstep(.0002, -.0002, pow(st.x - .25, 2) + pow((st.y - .3) * 3. * t, 2) - pow(.15, 2));
@@ -68,7 +68,7 @@ return eyeHole * (1 - bottom) * select(0., 1., st.y < .3);
 
 fn eyebrow(st: vec2f, h: vec2f) -> f32 {
   let thickness = .02;
-  let t = max(min((sin(uniforms.time * .0005 - 3.14)) * 24, 1), .34);
+  let t = max(min((sin(2 * uniforms.time * .0005 - 2.) + sin(3 * uniforms.time * .0005 - 8.) + sin(uniforms.time * .0005 - 8.)) * 4, 1), .34);
   let smaller = smoothstep(.0002, -.0002, pow(st.x - .75, 2) + pow((st.y - .3) * 3. * t, 2) - pow(.15, 2))
                 + smoothstep(.0002, -.0002, pow(st.x - .25, 2) + pow((st.y - .3) * 3. * t, 2) - pow(.15, 2));
   let bigger = smoothstep(.0002, -.0002, pow(st.x - .75 - thickness, 2) + pow((st.y - .3) * 3. * t, 2) - pow(.15 + thickness, 2))
