@@ -2,6 +2,8 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [master]
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,9 +14,12 @@ jobs:
       - uses: actions/setup-node@v3.6.0
         with:
           node-version: 18
-      - run: |
-          npm install
-          npm run build:prod
+      - uses: borales/actions-yarn@v4
+        with:
+          cmd: install
+      - uses: borales/actions-yarn@v4
+        with:
+          cmd: build
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v1.0.7
         with:
