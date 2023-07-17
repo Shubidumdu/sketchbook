@@ -4,7 +4,7 @@ import {
   compileShader,
   createProgram,
   resizeCanvasToDisplaySize,
-} from '../utils/webgl';
+} from '../../utils/webgl';
 import './style.scss';
 
 const canvas = document.querySelector('canvas')!;

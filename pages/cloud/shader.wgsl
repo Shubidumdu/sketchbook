@@ -16,7 +16,6 @@ fn vertexMain(in: VSInput) -> VSOutput {
 struct Uniforms {
   time: f32,
   resolution: vec2f,
-  mouse: vec2f,
 }
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
@@ -27,7 +26,6 @@ const FBM_NUM_OCTAVES = 8;
 @fragment
 fn fragmentMain(in: VSOutput) -> @location(0) vec4f {
   let st = in.pos.xy / uniforms.resolution;
-  let mouseSt = uniforms.mouse / uniforms.resolution;
   var color = vec3f(0, 0, 0);
   var horizon = horizon(st);
   let q = fbm(vec2f(st.x * 4. + uniforms.time * 0.0001, st.y * 4.));
