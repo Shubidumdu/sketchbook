@@ -1,6 +1,7 @@
 import {
   Animation,
   Color3,
+  Engine,
   FreeCamera,
   HemisphericLight,
   Mesh,
@@ -10,7 +11,6 @@ import {
   ShadowGenerator,
   StandardMaterial,
   Vector3,
-  WebGPUEngine,
 } from '@babylonjs/core';
 import './style.scss';
 import { SimpleMaterial } from '@babylonjs/materials';
@@ -19,11 +19,7 @@ import { rgbToColor3 } from '../../utils/color';
 const main = async () => {
   try {
     const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-    const engine = new WebGPUEngine(canvas, {
-      antialias: true,
-    });
-
-    await engine.initAsync();
+    const engine = new Engine(canvas, true);
 
     const scene = new Scene(engine);
     const camera = new FreeCamera('camera', new Vector3(0, 0, -10), scene);
