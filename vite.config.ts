@@ -31,7 +31,6 @@ export default defineConfig(async () => {
     build: {
       rollupOptions,
     },
-    // assetsInclude: ['**/*.glsl', '**/*.png', '**/*.wgsl'],
     css: {
       preprocessorOptions: {
         scss: {
