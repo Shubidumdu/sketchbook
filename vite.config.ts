@@ -31,6 +31,7 @@ export default defineConfig(async () => {
     build: {
       rollupOptions,
     },
+    assetsInclude: ['**/*.glb'],
     css: {
       preprocessorOptions: {
         scss: {

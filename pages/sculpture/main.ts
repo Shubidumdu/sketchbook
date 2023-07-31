@@ -8,6 +8,10 @@ import {
 } from '@babylonjs/core';
 import '@babylonjs/loaders';
 import './style.scss';
+import sculpturePath from  './sculpture.glb';
+
+const rootUrl = sculpturePath.split('/');
+const sceneFile = rootUrl.pop();
 
 const main = async () => {
   const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -20,8 +24,8 @@ const main = async () => {
 
   SceneLoader.ImportMesh(
     '',
-    './',
-    'sculpture.glb',
+    rootUrl.join('/') + '/',
+    sceneFile,
     scene,
     function () {
       const [headMaterial, eyeMaterial]  = scene.materials as PBRMaterial[];
