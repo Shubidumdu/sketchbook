@@ -19,7 +19,6 @@ const main = async () => {
   const engine = new Engine(canvas, true);
   const scene = new Scene(engine);
   const camera = new ArcRotateCamera('camera', 1, 1, 10, Vector3.Zero(), scene);
-  const light = new HemisphericLight('light', new Vector3(0, 1, 0), scene);
   
   camera.target = Vector3.Zero();
   camera.attachControl(canvas, true);
@@ -27,10 +26,10 @@ const main = async () => {
 
   const oneBitShaderMaterial = new ShaderMaterial("oneBitShader", scene, './1bit-shader', {
     attributes: ["position", "normal", "uv"],
-    uniforms: ["world", "worldView", "worldViewProjection", "view", "projection", "time", "direction" ],
-    needAlphaBlending: true,
-    needAlphaTesting: false,
+    uniforms: ["worldViewProjection", "reverseLightDirection"],
   });
+
+  oneBitShaderMaterial.setVector3("reverseLightDirection", new Vector3(1, 1, 1));
 
   SceneLoader.ImportMesh(
     '',

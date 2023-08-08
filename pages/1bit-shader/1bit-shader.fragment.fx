@@ -1,16 +1,15 @@
 #version 300 es
 precision highp float;
 
-uniform mat4 worldView;
+uniform vec3 reverseLightDirection;
 
 in vec4 vPosition;
 in vec3 vNormal;
 
-uniform sampler2D textureSampler;
-uniform sampler2D refSampler;
-
 out vec4 fragColor;
 
 void main(void) {
-  fragColor = vec4(1. * vNormal, 1.0);
+  vec3 normal = normalize(vNormal);
+  float light = dot(normal, reverseLightDirection);
+  fragColor = vec4(vec3(1. * light), 1.0);
 }
