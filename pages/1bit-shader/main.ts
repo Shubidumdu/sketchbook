@@ -4,6 +4,7 @@ import {
   HemisphericLight,
   Scene,
   SceneLoader,
+  Vector2,
   Vector3,
 } from '@babylonjs/core';
 import '@babylonjs/loaders';
@@ -26,10 +27,11 @@ const main = async () => {
 
   const oneBitShaderMaterial = new ShaderMaterial("oneBitShader", scene, './1bit-shader', {
     attributes: ["position", "normal", "uv"],
-    uniforms: ["worldViewProjection", "reverseLightDirection"],
+    uniforms: ["worldViewProjection", "reverseLightDirection", "resolution"],
   });
 
-  oneBitShaderMaterial.setVector3("reverseLightDirection", new Vector3(1, 1, 1));
+  oneBitShaderMaterial.setVector3("reverseLightDirection", new Vector3(.75, .5, 1));
+  oneBitShaderMaterial.setVector2("resolution", new Vector2(window.innerWidth, window.innerHeight));
 
   SceneLoader.ImportMesh(
     '',
