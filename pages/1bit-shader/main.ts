@@ -20,7 +20,7 @@ import '@babylonjs/loaders';
 import './style.scss';
 import bitPath from './1bit.glb';
 import { ShaderMaterial } from '@babylonjs/core';
-import { NormalMaterial, SimpleMaterial } from '@babylonjs/materials';
+import { NormalMaterial, ShadowOnlyMaterial, SimpleMaterial } from '@babylonjs/materials';
 import { Inspector } from '@babylonjs/inspector';
 
 const rootUrl = bitPath.split('/');
@@ -61,19 +61,8 @@ Effect.ShadersStore['1bitFragmentShader'] = `
       float diffDepth0 = depth1 - depth0;
       float diffDepth1 = depth3 - depth2;
       float edgeDepth = sqrt(pow(diffDepth0, 2.) + pow(diffDepth1, 2.)) * 100.;
-      edgeDepth = edgeDepth > depthThreshold ? 1. : 0.;
 
-      vec3 normal0 = texture2D(textureSampler, bottomLeftUV).rgb;
-      vec3 normal1 = texture2D(textureSampler, topRightUV).rgb;
-      vec3 normal2 = texture2D(textureSampler, bottomRightUV).rgb;
-      vec3 normal3 = texture2D(textureSampler, topLeftUV).rgb;
-      vec3 diffNormal0 = normal1 - normal0;
-      vec3 diffNormal1 = normal3 - normal2;
-      float edgeNormal = sqrt(dot(diffNormal0, diffNormal0) + dot(diffNormal1, diffNormal1));
-      edgeNormal = edgeNormal > normalThreshold ? 1. : 0.;
-
-      float edge = max(edgeDepth, 0.);
-      if (edge == 1.) {
+      if (edgeDepth > depthThreshold) {
         gl_FragColor = vec4(vec3(0.), 1.);
       } else {
         gl_FragColor = baseColor;
@@ -85,29 +74,20 @@ const main = async () => {
   const canvas = document.getElementById('canvas') as HTMLCanvasElement;
   const engine = new Engine(canvas, false);
   const scene = new Scene(engine);
-  const highlight = new HighlightLayer('hl', scene, {
-    isStroke: true,
-    mainTextureRatio: 2,
-  });
-  highlight.innerGlow = true;
-  highlight.blurHorizontalSize = 0.1;
-  highlight.blurVerticalSize = 0.1;
   const light = new DirectionalLight('light', new Vector3(2, -2, -4), scene);
   scene.clearColor = new Color4(0, 0, 0, 1);
   const camera = new ArcRotateCamera('camera', 1, 1, 10, Vector3.Zero(), scene);
   camera.minZ = 0;
   camera.maxZ = 100;
-  const ground = MeshBuilder.CreateGround(
-    'ground',
+  const groundShadow = MeshBuilder.CreateGround(
+    'groundShadow',
     { width: 100, height: 100 },
     scene,
   );
-  ground.position.y = -1.438;
-  const groundMaterial = new StandardMaterial('mat', scene);
-  groundMaterial.diffuseColor = new Color3(1., 0., 0.);
-  groundMaterial.cameraColorGradingEnabled = false;
-  ground.material = groundMaterial;
-  ground.receiveShadows = true;
+  groundShadow.position.y = -1.438;
+  const groundShadowMaterial = new ShadowOnlyMaterial('shadow', scene);
+  groundShadow.material = groundShadowMaterial;
+  groundShadow.receiveShadows = true;
 
   const shadowGenerator = new ShadowGenerator(512, light);
   shadowGenerator.useExponentialShadowMap = true;
@@ -134,6 +114,23 @@ const main = async () => {
     },
   );
 
+  const groundMaterial = new ShaderMaterial('groundShader', scene, './ground', {
+    attributes: ['position', 'normal', 'uv'],
+    uniforms: [
+      'world',
+      'view',
+      'worldViewProjection',
+      'mainColor',
+      'subColor',
+    ],
+  });
+  groundMaterial.setVector3('mainColor', new Vector3(1, 1, 1));
+  groundMaterial.setVector3('subColor', new Vector3(0, 0, 0));
+  
+  const ground = groundShadow.clone('ground');
+  ground.position.y = -1.44;
+  ground.material = groundMaterial;
+
   const renderer = scene.enableDepthRenderer();
 
   const targetMatrix = new Matrix();
@@ -156,15 +153,15 @@ const main = async () => {
     scene,
     function (meshes) {
       meshes.forEach((mesh) => {
-        // mesh.material = oneBitShaderMaterial;
-        mesh.material = new NormalMaterial('normal', scene);
+        mesh.material = oneBitShaderMaterial;
+        // mesh.material = new NormalMaterial('normal', scene);
         shadowGenerator.addShadowCaster(mesh);
       });
       engine.hideLoadingUI();
     },
   );
 
-  Inspector.Show(scene, {});
+  // Inspector.Show(scene, {});
 
   const postProcess = new PostProcess(
     'My custom post process',
@@ -174,6 +171,7 @@ const main = async () => {
     1,
     camera,
   );
+  
   postProcess.onApply = function (effect) {
     effect.setVector2('screenSize', new Vector2(canvas.width, canvas.height));
     effect.setFloat('depthThreshold', 0.2);
