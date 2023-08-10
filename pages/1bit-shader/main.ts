@@ -78,7 +78,7 @@ const main = async () => {
   scene.clearColor = new Color4(0, 0, 0, 1);
   const camera = new ArcRotateCamera('camera', 1, 1, 10, Vector3.Zero(), scene);
   camera.minZ = 0;
-  camera.maxZ = 100;
+  camera.maxZ = 30;
   const groundShadow = MeshBuilder.CreateGround(
     'groundShadow',
     { width: 100, height: 100 },
@@ -180,7 +180,9 @@ const main = async () => {
 
   engine.runRenderLoop(() => {
     scene.render();
-    engine.resize();
+    const dpr = window.devicePixelRatio;
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
   });
 };
 
