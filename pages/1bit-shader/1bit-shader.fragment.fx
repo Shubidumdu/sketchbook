@@ -2,7 +2,6 @@
 precision highp float;
 
 uniform vec3 reverseLightDirection;
-uniform vec2 resolution;
 uniform vec3 mainColor;
 uniform vec3 subColor;
 
@@ -12,9 +11,9 @@ in vec3 vNormal;
 out vec4 fragColor;
 
 void fill(vec2 p, float light) {
-  if (light >= .8) {
+  if (light >= .4) {
     fragColor = vec4(mainColor, 1.);
-  } else if (light >= .5) {
+  } else if (light >= .3) {
     if (mod(p.x - p.y, 2.0)==0.0) {
       fragColor = vec4(mainColor, 1.);
     } else {
