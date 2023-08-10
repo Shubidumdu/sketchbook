@@ -12,6 +12,7 @@ import {
   Scene,
   SceneLoader,
   ShadowGenerator,
+  StandardMaterial,
   Vector2,
   Vector3,
 } from '@babylonjs/core';
@@ -42,7 +43,8 @@ Effect.ShadersStore['1bitFragmentShader'] = `
   const float scale = 1.;
   const float halfScaleFloor = floor(scale * 0.5);
   const float halfScaleCeil = ceil(scale * 0.5);
-  const float depthThreshold = .1;
+  const float depthThreshold = 1.5;
+  const float normalThreshold = .4;
 
   void main(void) 
   {
@@ -56,17 +58,23 @@ Effect.ShadersStore['1bitFragmentShader'] = `
       float depth1 = texture2D(depthSampler, topRightUV).r;
       float depth2 = texture2D(depthSampler, bottomRightUV).r;
       float depth3 = texture2D(depthSampler, topLeftUV).r;
-      float diff0 = depth1 - depth0;
-      float diff1 = depth3 - depth2;
-      float edgeDepth = sqrt(pow(diff0, 2.) + pow(diff1, 2.)) * 100.;
+      float diffDepth0 = depth1 - depth0;
+      float diffDepth1 = depth3 - depth2;
+      float edgeDepth = sqrt(pow(diffDepth0, 2.) + pow(diffDepth1, 2.)) * 100.;
+      edgeDepth = edgeDepth > depthThreshold ? 1. : 0.;
 
-      if (baseColor.r > baseColor.b) {
-        gl_FragColor = vec4(1., 1., 1., 1.);
-        return;
-      }
+      vec3 normal0 = texture2D(textureSampler, bottomLeftUV).rgb;
+      vec3 normal1 = texture2D(textureSampler, topRightUV).rgb;
+      vec3 normal2 = texture2D(textureSampler, bottomRightUV).rgb;
+      vec3 normal3 = texture2D(textureSampler, topLeftUV).rgb;
+      vec3 diffNormal0 = normal1 - normal0;
+      vec3 diffNormal1 = normal3 - normal2;
+      float edgeNormal = sqrt(dot(diffNormal0, diffNormal0) + dot(diffNormal1, diffNormal1));
+      edgeNormal = edgeNormal > normalThreshold ? 1. : 0.;
 
-      if (edgeDepth > depthThreshold) {
-        gl_FragColor = vec4(0., 0., 0., 1.);
+      float edge = max(edgeDepth, 0.);
+      if (edge == 1.) {
+        gl_FragColor = vec4(vec3(0.), 1.);
       } else {
         gl_FragColor = baseColor;
       }
@@ -95,8 +103,9 @@ const main = async () => {
     scene,
   );
   ground.position.y = -1.438;
-  const groundMaterial = new SimpleMaterial('mat', scene);
-  groundMaterial.diffuseColor = new Color3(1, 0, 0);
+  const groundMaterial = new StandardMaterial('mat', scene);
+  groundMaterial.diffuseColor = new Color3(1., 0., 0.);
+  groundMaterial.cameraColorGradingEnabled = false;
   ground.material = groundMaterial;
   ground.receiveShadows = true;
 
@@ -147,14 +156,15 @@ const main = async () => {
     scene,
     function (meshes) {
       meshes.forEach((mesh) => {
-        mesh.material = oneBitShaderMaterial;
+        // mesh.material = oneBitShaderMaterial;
+        mesh.material = new NormalMaterial('normal', scene);
         shadowGenerator.addShadowCaster(mesh);
       });
       engine.hideLoadingUI();
     },
   );
 
-  // Inspector.Show(scene, {});
+  Inspector.Show(scene, {});
 
   const postProcess = new PostProcess(
     'My custom post process',
