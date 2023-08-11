@@ -7,6 +7,7 @@ uniform sampler2D textureSampler;
 uniform sampler2D depthSampler;
 
 uniform vec2 screenSize;
+uniform vec3 outlineColor;
 
 const float scale = 1.;
 const float halfScaleFloor = floor(scale * 0.5);
@@ -31,7 +32,7 @@ void main(void)
     float edgeDepth = sqrt(pow(diffDepth0, 2.) + pow(diffDepth1, 2.)) * 100.;
 
     if (edgeDepth > depthThreshold) {
-      gl_FragColor = vec4(vec3(0.), 1.);
+      gl_FragColor = vec4(outlineColor, 1.);
     } else {
       gl_FragColor = baseColor;
     }

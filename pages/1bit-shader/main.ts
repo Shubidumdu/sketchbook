@@ -1,5 +1,6 @@
 import {
   ArcRotateCamera,
+  Color3,
   Color4,
   DirectionalLight,
   Effect,
@@ -19,9 +20,14 @@ import meshesPath from './meshes.glb';
 import { ShaderMaterial } from '@babylonjs/core';
 import { ShadowOnlyMaterial } from '@babylonjs/materials';
 import outlineShader from './outline.fragment.fx?raw';
+import { hexToRgb } from '../../utils/color';
 
 const rootUrl = meshesPath.split('/');
 const sceneFile = rootUrl.pop();
+
+const [mainColor, subColor] = document.querySelectorAll<HTMLInputElement>('input');
+mainColor.value = '#ffffff';
+subColor.value = '#000000';
 
 Effect.ShadersStore['1bitFragmentShader'] = outlineShader;
 
@@ -36,7 +42,6 @@ const main = async () => {
   );
   light.shadowMaxZ = 80;
   light.shadowMinZ = -20;
-  scene.clearColor = new Color4(0, 0, 0, 1);
   const camera = new ArcRotateCamera('camera', 1, 1, 10, Vector3.Zero(), scene);
   camera.minZ = 0;
   camera.maxZ = 30;
@@ -79,15 +84,11 @@ const main = async () => {
     'reverseLightDirection',
     light.position.normalizeToNew(),
   );
-  oneBitShaderMaterial.setVector3('mainColor', new Vector3(1, 1, 1));
-  oneBitShaderMaterial.setVector3('subColor', new Vector3(0, 0, 0));
 
   const groundMaterial = new ShaderMaterial('groundShader', scene, './ground', {
     attributes: ['position', 'normal', 'uv'],
     uniforms: ['world', 'view', 'worldViewProjection', 'mainColor', 'subColor'],
   });
-  groundMaterial.setVector3('mainColor', new Vector3(1, 1, 1));
-  groundMaterial.setVector3('subColor', new Vector3(0, 0, 0));
 
   const ground = groundShadow.clone('ground');
   ground.position.y = -1.44;
@@ -118,23 +119,33 @@ const main = async () => {
   const postProcess = new PostProcess(
     'My custom post process',
     '1bit',
-    ['depthThreshold', 'screenSize'],
+    ['depthThreshold', 'screenSize', 'outlineColor'],
     ['depthSampler'],
     1,
     camera,
   );
 
   postProcess.onApply = function (effect) {
+    const subColorRgb = hexToRgb(subColor.value, true);
     effect.setVector2('screenSize', new Vector2(canvas.width, canvas.height));
     effect.setFloat('depthThreshold', 0.2);
     effect.setTexture('depthSampler', renderer.getDepthMap());
+    effect.setVector3('outlineColor', new Vector3(...subColorRgb));
   };
 
   engine.runRenderLoop(() => {
-    scene.render();
+    const mainColorRgb = hexToRgb(mainColor.value, true);
+    const subColorRgb = hexToRgb(subColor.value, true);
+    oneBitShaderMaterial.setVector3('mainColor', new Vector3(...mainColorRgb));
+    oneBitShaderMaterial.setVector3('subColor', new Vector3(...subColorRgb));
+    groundMaterial.setVector3('mainColor', new Vector3(...mainColorRgb));
+    groundMaterial.setVector3('subColor', new Vector3(...subColorRgb));
+    groundShadowMaterial.shadowColor = new Color3(...subColorRgb);
+    scene.clearColor = new Color4(...mainColorRgb, 1);
     const dpr = window.devicePixelRatio;
     canvas.width = window.innerWidth * dpr;
     canvas.height = window.innerHeight * dpr;
+    scene.render();
   });
 };
 
