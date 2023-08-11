@@ -23,3 +23,13 @@ declare module '*.glb' {
   export default value;
 }
 
+declare module '*.fx' {
+  const value: string;
+  export default value;
+}
+
+
+declare module '*.fx?raw' {
+  const value: string;
+  export default value;
+}
