@@ -46,35 +46,50 @@ const main = async () => {
       },
     });
 
-    const POINT_COUNT = 1;
+    const POINT_COUNT = 100;
     const POINT_SIZE = 16;
 
-    const input = new Float32Array([...new Array(POINT_COUNT)].map(() => {
-      const dpr = window.devicePixelRatio;
-      const TEXEL_SIZE = [
-        POINT_SIZE * dpr / canvas.width,
-        POINT_SIZE * dpr / canvas.height,
-      ];
-      const position = [
-        Math.random() * 2 - 1,
-        Math.random() * 2 - 1,
-      ];
+    const input = new Float32Array(
+      [...new Array(POINT_COUNT)]
+        .map(() => {
+          const dpr = window.devicePixelRatio;
+          const TEXEL_SIZE = [
+            (POINT_SIZE * dpr) / canvas.width,
+            (POINT_SIZE * dpr) / canvas.height,
+          ];
+          const position = [Math.random() * 2 - 1, Math.random() * 2 - 1];
 
-      return [
-        position[0] - TEXEL_SIZE[0] / 2,
-        position[1] + TEXEL_SIZE[1] / 2,
-        position[0] - TEXEL_SIZE[0] / 2,
-        position[1] - TEXEL_SIZE[1] / 2,
-        position[0] + TEXEL_SIZE[0] / 2,
-        position[1] + TEXEL_SIZE[1] / 2,
-        position[0] + TEXEL_SIZE[0] / 2,
-        position[1] + TEXEL_SIZE[1] / 2,
-        position[0] - TEXEL_SIZE[0] / 2,
-        position[1] - TEXEL_SIZE[1] / 2,
-        position[0] + TEXEL_SIZE[0] / 2,
-        position[1] - TEXEL_SIZE[1] / 2,
-      ];
-    }).flat());
+          return [
+            position[0] - TEXEL_SIZE[0] / 2,
+            position[1] + TEXEL_SIZE[1] / 2,
+            position[0] - TEXEL_SIZE[0] / 2,
+            position[1] - TEXEL_SIZE[1] / 2,
+            position[0] + TEXEL_SIZE[0] / 2,
+            position[1] + TEXEL_SIZE[1] / 2,
+            position[0] + TEXEL_SIZE[0] / 2,
+            position[1] - TEXEL_SIZE[1] / 2,
+          ];
+        })
+        .flat(),
+    );
+
+    const indexData = new Uint32Array(
+      [...new Array(POINT_COUNT)]
+        .map((_, index) => {
+          const offset = index * 4;
+          return [0, 1, 2, 2, 1, 3].map((i) => i + offset);
+        })
+        .flat(),
+    );
+
+    const indexBuffer = device.createBuffer({
+      label: 'index buffer',
+      size: indexData.byteLength,
+      usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
+      mappedAtCreation: false
+    });
+
+    device.queue.writeBuffer(indexBuffer, 0, indexData);
 
     const workBuffer = device.createBuffer({
       label: 'work buffer',
@@ -154,7 +169,6 @@ const main = async () => {
       const computePass = computeEncoder.beginComputePass({
         label: 'doubling compute pass',
       });
-
       computePass.setPipeline(ComputePipeline);
       computePass.setBindGroup(0, bindGroup);
       computePass.dispatchWorkgroups(1);
@@ -172,10 +186,11 @@ const main = async () => {
       const renderPass = renderEncoder.beginRenderPass(renderPassDescriptor);
       renderPass.setPipeline(renderPipeline);
       renderPass.setVertexBuffer(0, workBuffer);
-      renderPass.draw(input.length / 2);
+      renderPass.setIndexBuffer(indexBuffer, 'uint32');
+      renderPass.drawIndexed(input.length / 2);
       renderPass.end();
       device.queue.submit([renderEncoder.finish()]);
-      
+
       requestAnimationFrame(render);
     };
 
