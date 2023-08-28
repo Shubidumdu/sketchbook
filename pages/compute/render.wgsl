@@ -1,10 +1,10 @@
 struct VSInput {
-  @location(0) pos: vec2f,
+  @location(0) position: vec2f,
   @builtin(vertex_index) vertexIndex: u32
 }
 
 struct VSOutput {
-  @builtin(position) pos: vec4f,
+  @builtin(position) position: vec4f,
 }
 
 struct Uniforms {
@@ -18,49 +18,22 @@ struct Uniforms {
 
 @vertex
 fn vertexMain(in: VSInput) -> VSOutput {
-  let pointSize = vec2f(uniforms.pointSize) / uniforms.resolution;
+  let vertexPosition = getVertexPosition(in.position, in.vertexIndex);
   var vsOut: VSOutput;
-  if (in.vertexIndex == 0) {
-    vsOut.pos = vec4f(
-      vec2f(
-        in.pos.x - pointSize.x / 2.,
-        in.pos.y + pointSize.y / 2.,
-      ), 
-      1, 
-      1
-    );
-  } 
-  if (in.vertexIndex == 1) {
-    vsOut.pos = vec4f(
-      vec2f(
-        in.pos.x - pointSize.x / 2.,
-        in.pos.y - pointSize.y / 2.,
-      ), 
-      1, 
-      1
-    );
-  }
-  if (in.vertexIndex == 2) {
-    vsOut.pos = vec4f(
-      vec2f(
-        in.pos.x + pointSize.x / 2.,
-        in.pos.y + pointSize.y / 2.,
-      ), 
-      1, 
-      1
-    );
-  }
-  if (in.vertexIndex == 3) {
-    vsOut.pos = vec4f(
-      vec2f(
-        in.pos.x + pointSize.x / 2.,
-        in.pos.y - pointSize.y / 2.,
-      ), 
-      1, 
-      1
-    );
-  }
+  vsOut.position = vec4f(vertexPosition, 1., 1.);
   return vsOut;
+}
+
+fn getVertexPosition(center: vec2f, vertexIndex: u32) -> vec2f {
+  let pointSize = vec2f(uniforms.pointSize) / uniforms.resolution;
+  let quadPosition = array(
+      vec2f(-.5, .5),
+      vec2f(-.5, -.5),
+      vec2f(.5, .5),
+      vec2f(.5, -.5),
+    );
+  let pos = center + quadPosition[vertexIndex] * pointSize;
+  return pos;
 }
 
 @fragment
