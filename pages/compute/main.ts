@@ -10,7 +10,7 @@ type MousePosition = {
 
 let mousePosition: MousePosition | null = null;
 
-const POINT_SIZE = 8;
+const POINT_SIZE = 2 * window.devicePixelRatio;
 
 const main = async () => {
   try {
@@ -48,7 +48,7 @@ const main = async () => {
       },
     });
 
-    const POINT_COUNT = 120;
+    const POINT_COUNT = 100_000;
 
     const pointPositions = new Float32Array(
       [...new Array(POINT_COUNT)]
@@ -93,8 +93,8 @@ const main = async () => {
     const agentData = new Float32Array(
       [...new Array(POINT_COUNT)]
         .map(() => {
-          const angle = Math.random() * Math.PI * 2;
-          const speed = Math.random() * 0.01;
+          const angle = Math.random() * Math.PI * 2; // 0 ~ 2PI
+          const speed = Math.random() * 0.01; // 0 ~ 0.01
           return [angle, speed];
         })
         .flat(),
@@ -109,6 +109,8 @@ const main = async () => {
         GPUBufferUsage.COPY_DST,
       mappedAtCreation: false,
     });
+
+    device.queue.writeBuffer(agentBuffer, 0, agentData);
 
     const bindGroup = device.createBindGroup({
       label: 'bindGroup for computing vertex buffer',
@@ -204,7 +206,7 @@ const main = async () => {
       });
       computePass.setPipeline(ComputePipeline);
       computePass.setBindGroup(0, bindGroup);
-      computePass.dispatchWorkgroups(3);
+      computePass.dispatchWorkgroups(Math.ceil(POINT_COUNT / 64));
       computePass.end();
 
       // Finish encoding and submit the commands

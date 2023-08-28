@@ -16,6 +16,8 @@ struct Agent {
   positions[globalId.x].y += rotate(angle, positions[globalId.x]).y * speed;
 }
 
+// [[cos(a), -sin(a)], [sin(a), cos(a)]
+//
 fn rotate(angle: f32, position: vec2f) -> vec2f {
   let x = position.x * cos(angle) - position.y * sin(angle);
   let y = position.x * sin(angle) + position.y * cos(angle);

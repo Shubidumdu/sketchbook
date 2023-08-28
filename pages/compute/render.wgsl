@@ -39,5 +39,5 @@ fn getVertexPosition(center: vec2f, vertexIndex: u32) -> vec2f {
 @fragment
 fn fragmentMain(in: VSOutput) -> @location(0) vec4f {
 
-  return vec4f(vec3f(1.), 1.);
+  return vec4f(vec3f(.8), 1.);
 }
