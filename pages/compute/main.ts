@@ -46,7 +46,7 @@ const main = async () => {
       },
     });
 
-    const POINT_COUNT = 100;
+    const POINT_COUNT = 3;
     const POINT_SIZE = 16;
 
     const input = new Float32Array(
@@ -60,14 +60,8 @@ const main = async () => {
           const position = [Math.random() * 2 - 1, Math.random() * 2 - 1];
 
           return [
-            position[0] - TEXEL_SIZE[0] / 2,
-            position[1] + TEXEL_SIZE[1] / 2,
-            position[0] - TEXEL_SIZE[0] / 2,
-            position[1] - TEXEL_SIZE[1] / 2,
-            position[0] + TEXEL_SIZE[0] / 2,
-            position[1] + TEXEL_SIZE[1] / 2,
-            position[0] + TEXEL_SIZE[0] / 2,
-            position[1] - TEXEL_SIZE[1] / 2,
+            position[0],
+            position[1],
           ];
         })
         .flat(),
@@ -128,8 +122,9 @@ const main = async () => {
       ],
     };
 
-    const vertexBufferLayout = {
+    const vertexBufferLayout: GPUVertexBufferLayout = {
       arrayStride: 8,
+      stepMode: 'instance',
       attributes: [
         {
           format: 'float32x2' as const,
@@ -161,7 +156,7 @@ const main = async () => {
       },
     });
 
-    const render = async (time: number) => {
+    const render = (time: number) => {
       // Compute Shader
       const computeEncoder = device.createCommandEncoder({
         label: 'doubling encoder',
@@ -187,7 +182,7 @@ const main = async () => {
       renderPass.setPipeline(renderPipeline);
       renderPass.setVertexBuffer(0, workBuffer);
       renderPass.setIndexBuffer(indexBuffer, 'uint32');
-      renderPass.drawIndexed(input.length / 2);
+      renderPass.drawIndexed(6, input.length / 2);
       renderPass.end();
       device.queue.submit([renderEncoder.finish()]);
 
