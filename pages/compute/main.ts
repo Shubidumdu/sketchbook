@@ -48,9 +48,9 @@ const main = async () => {
       },
     });
 
-    const POINT_COUNT = 3;
+    const POINT_COUNT = 120;
 
-    const input = new Float32Array(
+    const pointPositions = new Float32Array(
       [...new Array(POINT_COUNT)]
         .map(() => {
           const position = [Math.random() * 2 - 1, Math.random() * 2 - 1];
@@ -72,14 +72,14 @@ const main = async () => {
       label: 'index buffer',
       size: indexData.byteLength,
       usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
-      mappedAtCreation: false
+      mappedAtCreation: false,
     });
 
     device.queue.writeBuffer(indexBuffer, 0, indexData);
 
-    const workBuffer = device.createBuffer({
-      label: 'work buffer',
-      size: input.byteLength,
+    const vertexBuffer = device.createBuffer({
+      label: 'Vertex buffer',
+      size: pointPositions.byteLength,
       usage:
         GPUBufferUsage.VERTEX |
         GPUBufferUsage.STORAGE |
@@ -88,16 +88,43 @@ const main = async () => {
       mappedAtCreation: false,
     });
 
-    device.queue.writeBuffer(workBuffer, 0, input);
+    device.queue.writeBuffer(vertexBuffer, 0, pointPositions);
+
+    const agentData = new Float32Array(
+      [...new Array(POINT_COUNT)]
+        .map(() => {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = Math.random() * 0.01;
+          return [angle, speed];
+        })
+        .flat(),
+    );
+
+    const agentBuffer = device.createBuffer({
+      label: 'Agent buffer',
+      size: agentData.byteLength,
+      usage:
+        GPUBufferUsage.STORAGE |
+        GPUBufferUsage.COPY_SRC |
+        GPUBufferUsage.COPY_DST,
+      mappedAtCreation: false,
+    });
 
     const bindGroup = device.createBindGroup({
-      label: 'bindGroup for work buffer',
+      label: 'bindGroup for computing vertex buffer',
       layout: ComputePipeline.getBindGroupLayout(0),
-      entries: [{ binding: 0, resource: { buffer: workBuffer } }],
+      entries: [
+        { binding: 0, resource: { buffer: vertexBuffer } },
+        { binding: 1, resource: { buffer: agentBuffer } },
+      ],
     });
 
     // Uniforms
-    const UNIFORM_BUFFER_SIZE = 2 * 4 + 2 * 4 + 1 * 4 + 1 * 4;
+    const UNIFORM_BUFFER_SIZE =
+      1 * 4 + // time
+      1 * 4 + // pointSize
+      2 * 4 + // resolution
+      2 * 4; // mousePosition
 
     const uniformBuffer = device.createBuffer({
       label: 'uniform buffer',
@@ -167,7 +194,7 @@ const main = async () => {
 
     const render = (time: number) => {
       resizeCanvasToDisplaySize(canvas);
-      
+
       // Compute Shader
       const computeEncoder = device.createCommandEncoder({
         label: 'doubling encoder',
@@ -197,9 +224,9 @@ const main = async () => {
       uniformValues.set([mousePosition?.x || 0, mousePosition?.y || 0], 4); // mousePosition
       device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
       renderPass.setBindGroup(0, uniformBindGroup);
-      renderPass.setVertexBuffer(0, workBuffer);
+      renderPass.setVertexBuffer(0, vertexBuffer);
       renderPass.setIndexBuffer(indexBuffer, 'uint32');
-      renderPass.drawIndexed(6, input.length / 2);
+      renderPass.drawIndexed(6, pointPositions.length / 2);
       renderPass.end();
       device.queue.submit([renderEncoder.finish()]);
 
@@ -215,3 +242,15 @@ const main = async () => {
 };
 
 main();
+
+window.addEventListener('pointermove', (e) => {
+  const dpr = window.devicePixelRatio;
+  const clientX = e.clientX * dpr;
+  const clientY = e.clientY * dpr;
+  if (!mousePosition) {
+    mousePosition = { x: clientX, y: clientY };
+  } else {
+    mousePosition.x = clientX;
+    mousePosition.y = clientY;
+  }
+});
