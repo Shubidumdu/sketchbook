@@ -1,4 +1,5 @@
-import shader from './shader.wgsl?raw';
+import computeShader from './compute.wgsl?raw';
+import renderShader from './render.wgsl?raw';
 import './style.scss';
 import { resizeCanvasToDisplaySize } from '../../utils/webgl';
 
@@ -30,13 +31,14 @@ const main = async () => {
       throw new Error('need a browser that supports WebGPU');
     }
 
+    // ComputePipeline
     const module = device.createShaderModule({
-      label: 'My Shader',
-      code: shader,
+      label: 'compute shader',
+      code: computeShader,
     });
 
-    const pipeline = device.createComputePipeline({
-      label: 'My Pipeline',
+    const ComputePipeline = device.createComputePipeline({
+      label: 'compute pipeline',
       layout: 'auto',
       compute: {
         module,
@@ -44,12 +46,41 @@ const main = async () => {
       },
     });
 
-    const input = new Float32Array([1, 3, 5]);
+    const POINT_COUNT = 1;
+    const POINT_SIZE = 16;
+
+    const input = new Float32Array([...new Array(POINT_COUNT)].map(() => {
+      const dpr = window.devicePixelRatio;
+      const TEXEL_SIZE = [
+        POINT_SIZE * dpr / canvas.width,
+        POINT_SIZE * dpr / canvas.height,
+      ];
+      const position = [
+        Math.random() * 2 - 1,
+        Math.random() * 2 - 1,
+      ];
+
+      return [
+        position[0] - TEXEL_SIZE[0] / 2,
+        position[1] + TEXEL_SIZE[1] / 2,
+        position[0] - TEXEL_SIZE[0] / 2,
+        position[1] - TEXEL_SIZE[1] / 2,
+        position[0] + TEXEL_SIZE[0] / 2,
+        position[1] + TEXEL_SIZE[1] / 2,
+        position[0] + TEXEL_SIZE[0] / 2,
+        position[1] + TEXEL_SIZE[1] / 2,
+        position[0] - TEXEL_SIZE[0] / 2,
+        position[1] - TEXEL_SIZE[1] / 2,
+        position[0] + TEXEL_SIZE[0] / 2,
+        position[1] - TEXEL_SIZE[1] / 2,
+      ];
+    }).flat());
 
     const workBuffer = device.createBuffer({
       label: 'work buffer',
       size: input.byteLength,
       usage:
+        GPUBufferUsage.VERTEX |
         GPUBufferUsage.STORAGE |
         GPUBufferUsage.COPY_SRC |
         GPUBufferUsage.COPY_DST,
@@ -58,52 +89,93 @@ const main = async () => {
 
     device.queue.writeBuffer(workBuffer, 0, input);
 
-    const resultBuffer = device.createBuffer({
-      label: 'result buffer',
-      size: input.byteLength,
-      usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
-      mappedAtCreation: false,
-    });
-
     const bindGroup = device.createBindGroup({
       label: 'bindGroup for work buffer',
-      layout: pipeline.getBindGroupLayout(0),
+      layout: ComputePipeline.getBindGroupLayout(0),
       entries: [{ binding: 0, resource: { buffer: workBuffer } }],
     });
 
-    const encoder = device.createCommandEncoder({
-      label: 'doubling encoder',
+    // RenderPipeline
+    const context = canvas.getContext('webgpu')!;
+    const canvasFormat = navigator.gpu.getPreferredCanvasFormat();
+    context.configure({
+      device,
+      format: canvasFormat,
     });
-    const pass = encoder.beginComputePass({
-      label: 'doubling compute pass',
+
+    const renderPassDescriptor = {
+      colorAttachments: [
+        {
+          view: context.getCurrentTexture().createView(),
+          loadOp: 'clear' as const,
+          storeOp: 'store' as const,
+        },
+      ],
+    };
+
+    const vertexBufferLayout = {
+      arrayStride: 8,
+      attributes: [
+        {
+          format: 'float32x2' as const,
+          offset: 0,
+          shaderLocation: 0, // Position, see vertex shader
+        },
+      ],
+    };
+
+    const shaderModule = device.createShaderModule({
+      code: renderShader,
     });
 
-    pass.setPipeline(pipeline);
-    pass.setBindGroup(0, bindGroup);
-    pass.dispatchWorkgroups(input.length);
-    pass.end();
+    const renderPipeline = device.createRenderPipeline({
+      layout: 'auto',
+      vertex: {
+        module: shaderModule,
+        entryPoint: 'vertexMain',
+        buffers: [vertexBufferLayout],
+      },
+      fragment: {
+        module: shaderModule,
+        entryPoint: 'fragmentMain',
+        targets: [
+          {
+            format: canvasFormat,
+          },
+        ],
+      },
+    });
 
-    encoder.copyBufferToBuffer(
-      workBuffer,
-      0,
-      resultBuffer,
-      0,
-      resultBuffer.size,
-    );
+    const render = async (time: number) => {
+      // Compute Shader
+      const computeEncoder = device.createCommandEncoder({
+        label: 'doubling encoder',
+      });
+      const computePass = computeEncoder.beginComputePass({
+        label: 'doubling compute pass',
+      });
 
-    // Finish encoding and submit the commands
-    const commandBuffer = encoder.finish();
-    device.queue.submit([commandBuffer]);
+      computePass.setPipeline(ComputePipeline);
+      computePass.setBindGroup(0, bindGroup);
+      computePass.dispatchWorkgroups(1);
+      computePass.end();
 
-    // Read the results
-    await resultBuffer.mapAsync(GPUMapMode.READ);
-    const result = new Float32Array(resultBuffer.getMappedRange().slice(0));
-    resultBuffer.unmap();
+      // Finish encoding and submit the commands
+      const commandBuffer = computeEncoder.finish();
+      device.queue.submit([commandBuffer]);
 
-    console.log('input', input);
-    console.log('result', result);
-
-    const render = (time: number) => {
+      // Render Shader
+      renderPassDescriptor.colorAttachments[0].view = context
+        .getCurrentTexture()
+        .createView();
+      const renderEncoder = device.createCommandEncoder();
+      const renderPass = renderEncoder.beginRenderPass(renderPassDescriptor);
+      renderPass.setPipeline(renderPipeline);
+      renderPass.setVertexBuffer(0, workBuffer);
+      renderPass.draw(input.length / 2);
+      renderPass.end();
+      device.queue.submit([renderEncoder.finish()]);
+      
       requestAnimationFrame(render);
     };
 
