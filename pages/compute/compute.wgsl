@@ -3,7 +3,7 @@ struct Agent {
   speed: f32
 }
 
-@group(0) @binding(0) var<storage, read_write> position: array<vec2f>;
+@group(0) @binding(0) var<storage, read_write> positions: array<vec2f>;
 @group(0) @binding(1) var<storage, read_write> agent: array<Agent>;
 
 @compute @workgroup_size(64, 1, 1) fn computeMain(
@@ -12,6 +12,12 @@ struct Agent {
 ) {
   let angle = agent[globalId.x].angle;
   let speed = agent[globalId.x].speed;
-  position[globalId.x].x += 0.001;
-  position[globalId.x].y += 0.001;
+  positions[globalId.x].x += rotate(angle, positions[globalId.x]).x * speed;
+  positions[globalId.x].y += rotate(angle, positions[globalId.x]).y * speed;
+}
+
+fn rotate(angle: f32, position: vec2f) -> vec2f {
+  let x = position.x * cos(angle) - position.y * sin(angle);
+  let y = position.x * sin(angle) + position.y * cos(angle);
+  return vec2f(x, y);
 }

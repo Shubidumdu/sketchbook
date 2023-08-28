@@ -10,7 +10,7 @@ type MousePosition = {
 
 let mousePosition: MousePosition | null = null;
 
-const POINT_SIZE = 32;
+const POINT_SIZE = 8;
 
 const main = async () => {
   try {
@@ -204,7 +204,7 @@ const main = async () => {
       });
       computePass.setPipeline(ComputePipeline);
       computePass.setBindGroup(0, bindGroup);
-      computePass.dispatchWorkgroups(1);
+      computePass.dispatchWorkgroups(3);
       computePass.end();
 
       // Finish encoding and submit the commands
