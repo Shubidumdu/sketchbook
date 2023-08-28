@@ -112,14 +112,31 @@ const main = async () => {
 
     device.queue.writeBuffer(agentBuffer, 0, agentData);
 
+    const COMPUTE_UNIFORM_BUFFER_SIZE =
+      4 * 2 + // deltaTime
+      4 * 2 + // mousePosition
+      4 * 2; // resolution
+
+    const computeUniformBuffer = device.createBuffer({
+      label: 'compute uniform buffer',
+      size: COMPUTE_UNIFORM_BUFFER_SIZE,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      mappedAtCreation: false,
+    });
+
     const bindGroup = device.createBindGroup({
       label: 'bindGroup for computing vertex buffer',
       layout: ComputePipeline.getBindGroupLayout(0),
       entries: [
         { binding: 0, resource: { buffer: vertexBuffer } },
         { binding: 1, resource: { buffer: agentBuffer } },
+        { binding: 2, resource: { buffer: computeUniformBuffer } },
       ],
     });
+
+    const computeUniformValues = new Float32Array(
+      COMPUTE_UNIFORM_BUFFER_SIZE / 4,
+    );
 
     // Uniforms
     const UNIFORM_BUFFER_SIZE =
@@ -194,7 +211,11 @@ const main = async () => {
       entries: [{ binding: 0, resource: { buffer: uniformBuffer } }],
     });
 
-    const render = (time: number) => {
+    let time = 0;
+
+    const render = (newTime: number) => {
+      const deltaTime = newTime - time;
+      time = newTime;
       resizeCanvasToDisplaySize(canvas);
 
       // Compute Shader
@@ -204,6 +225,16 @@ const main = async () => {
       const computePass = computeEncoder.beginComputePass({
         label: 'doubling compute pass',
       });
+      computeUniformValues.set([deltaTime], 0); // deltaTime
+      computeUniformValues.set(
+        [
+          mousePosition?.x || canvas.width / 2,
+          canvas.height - (mousePosition?.y || canvas.height / 2),
+        ],
+        2,
+      ); // mousePosition
+      computeUniformValues.set([canvas.width, canvas.height], 4); // resolution
+      device.queue.writeBuffer(computeUniformBuffer, 0, computeUniformValues);
       computePass.setPipeline(ComputePipeline);
       computePass.setBindGroup(0, bindGroup);
       computePass.dispatchWorkgroups(Math.ceil(POINT_COUNT / 64));
