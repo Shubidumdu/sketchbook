@@ -10,6 +10,8 @@ type MousePosition = {
 
 let mousePosition: MousePosition | null = null;
 
+const POINT_SIZE = 32;
+
 const main = async () => {
   try {
     const canvas = document.querySelector('canvas')!;
@@ -47,22 +49,12 @@ const main = async () => {
     });
 
     const POINT_COUNT = 3;
-    const POINT_SIZE = 16;
 
     const input = new Float32Array(
       [...new Array(POINT_COUNT)]
         .map(() => {
-          const dpr = window.devicePixelRatio;
-          const TEXEL_SIZE = [
-            (POINT_SIZE * dpr) / canvas.width,
-            (POINT_SIZE * dpr) / canvas.height,
-          ];
           const position = [Math.random() * 2 - 1, Math.random() * 2 - 1];
-
-          return [
-            position[0],
-            position[1],
-          ];
+          return position;
         })
         .flat(),
     );
@@ -103,6 +95,18 @@ const main = async () => {
       layout: ComputePipeline.getBindGroupLayout(0),
       entries: [{ binding: 0, resource: { buffer: workBuffer } }],
     });
+
+    // Uniforms
+    const UNIFORM_BUFFER_SIZE = 2 * 4 + 2 * 4 + 1 * 4 + 1 * 4;
+
+    const uniformBuffer = device.createBuffer({
+      label: 'uniform buffer',
+      size: UNIFORM_BUFFER_SIZE,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      mappedAtCreation: false,
+    });
+
+    const uniformValues = new Float32Array(UNIFORM_BUFFER_SIZE / 4);
 
     // RenderPipeline
     const context = canvas.getContext('webgpu')!;
@@ -156,7 +160,14 @@ const main = async () => {
       },
     });
 
+    const uniformBindGroup = device.createBindGroup({
+      layout: renderPipeline.getBindGroupLayout(0),
+      entries: [{ binding: 0, resource: { buffer: uniformBuffer } }],
+    });
+
     const render = (time: number) => {
+      resizeCanvasToDisplaySize(canvas);
+      
       // Compute Shader
       const computeEncoder = device.createCommandEncoder({
         label: 'doubling encoder',
@@ -180,6 +191,12 @@ const main = async () => {
       const renderEncoder = device.createCommandEncoder();
       const renderPass = renderEncoder.beginRenderPass(renderPassDescriptor);
       renderPass.setPipeline(renderPipeline);
+      uniformValues.set([time], 0); // time
+      uniformValues.set([POINT_SIZE], 1); // pointSize
+      uniformValues.set([canvas.width, canvas.height], 2); // resolution
+      uniformValues.set([mousePosition?.x || 0, mousePosition?.y || 0], 4); // mousePosition
+      device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
+      renderPass.setBindGroup(0, uniformBindGroup);
       renderPass.setVertexBuffer(0, workBuffer);
       renderPass.setIndexBuffer(indexBuffer, 'uint32');
       renderPass.drawIndexed(6, input.length / 2);
