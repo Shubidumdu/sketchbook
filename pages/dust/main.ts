@@ -10,6 +10,9 @@ type MousePosition = {
 
 let mousePosition: MousePosition | null = null;
 
+const USE_COMPUTE_SHADER = true;
+const POINT_COUNT = 200000;
+
 const POINT_SIZE = 2 * window.devicePixelRatio;
 
 const main = async () => {
@@ -47,8 +50,6 @@ const main = async () => {
         entryPoint: 'computeMain',
       },
     });
-
-    const POINT_COUNT = 100_000;
 
     const pointPositions = new Float32Array(
       [...new Array(POINT_COUNT)]
@@ -166,7 +167,7 @@ const main = async () => {
           view: context.getCurrentTexture().createView(),
           loadOp: 'clear' as const,
           storeOp: 'store' as const,
-          clearValue: { r: 0.2, g: 0.2, b: 0.4, a: 1 },
+          clearValue: { r: 0.2, g: 0.3, b: 0.4, a: 1 },
         },
       ],
     };
@@ -217,31 +218,67 @@ const main = async () => {
       time = newTime;
       resizeCanvasToDisplaySize(canvas);
 
-      // Compute Shader
-      const computeEncoder = device.createCommandEncoder({
-        label: 'doubling encoder',
-      });
-      const computePass = computeEncoder.beginComputePass({
-        label: 'doubling compute pass',
-      });
-      computeUniformValues.set([deltaTime], 0); // deltaTime
-      computeUniformValues.set(
-        [
+      if (USE_COMPUTE_SHADER) {
+        // Compute Shader
+        const computeEncoder = device.createCommandEncoder({
+          label: 'doubling encoder',
+        });
+        const computePass = computeEncoder.beginComputePass({
+          label: 'doubling compute pass',
+        });
+        computeUniformValues.set([deltaTime], 0); // deltaTime
+        computeUniformValues.set(
+          [
+            mousePosition?.x || canvas.width / 2,
+            canvas.height - (mousePosition?.y || canvas.height / 2),
+          ],
+          2,
+        ); // mousePosition
+        computeUniformValues.set([canvas.width, canvas.height], 4); // resolution
+        device.queue.writeBuffer(computeUniformBuffer, 0, computeUniformValues);
+        computePass.setPipeline(ComputePipeline);
+        computePass.setBindGroup(0, bindGroup);
+        computePass.dispatchWorkgroups(Math.ceil(POINT_COUNT / 64));
+        computePass.end();
+
+        // Finish encoding and submit the commands
+        const commandBuffer = computeEncoder.finish();
+        device.queue.submit([commandBuffer]);
+      } else {
+        // Use CPU version
+        const resolution = [canvas.width, canvas.height];
+        const _mousePosition = [
           mousePosition?.x || canvas.width / 2,
           canvas.height - (mousePosition?.y || canvas.height / 2),
-        ],
-        2,
-      ); // mousePosition
-      computeUniformValues.set([canvas.width, canvas.height], 4); // resolution
-      device.queue.writeBuffer(computeUniformBuffer, 0, computeUniformValues);
-      computePass.setPipeline(ComputePipeline);
-      computePass.setBindGroup(0, bindGroup);
-      computePass.dispatchWorkgroups(Math.ceil(POINT_COUNT / 64));
-      computePass.end();
-
-      // Finish encoding and submit the commands
-      const commandBuffer = computeEncoder.finish();
-      device.queue.submit([commandBuffer]);
+        ].map((v, i) => (v * 2 - resolution[i]) / resolution[i]);
+        pointPositions.forEach((_, index) => {
+          if (index % 2 === 0) {
+            const position = [
+              pointPositions[index] - _mousePosition[0],
+              pointPositions[index + 1] - _mousePosition[1],
+            ];
+            const angle = particleData[index * 2];
+            const speed = particleData[index * 2 + 1];
+            const transform = () => {
+              const ratio = resolution[0] / resolution[1];
+              const size = 0.125;
+              const x =
+                ratio * Math.cos(angle) * (position[0] + size) -
+                Math.sin(angle) * (position[1] + size) -
+                size;
+              const y =
+                ratio * Math.sin(angle) * (position[0] - size) +
+                Math.cos(angle) * (position[1] - size) +
+                size;
+              return [x, y];
+            };
+            const transformed = transform();
+            pointPositions[index] += transformed[0] * speed * deltaTime;
+            pointPositions[index + 1] += transformed[1] * speed * deltaTime;
+          }
+        });
+        device.queue.writeBuffer(vertexBuffer, 0, pointPositions);
+      }
 
       // Render Shader
       renderPassDescriptor.colorAttachments[0].view = context
