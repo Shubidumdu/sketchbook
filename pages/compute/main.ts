@@ -140,10 +140,8 @@ const main = async () => {
 
     // Uniforms
     const UNIFORM_BUFFER_SIZE =
-      1 * 4 + // time
-      1 * 4 + // pointSize
-      2 * 4 + // resolution
-      2 * 4; // mousePosition
+      2 * 4 + // pointSize
+      2 * 4; // resolution
 
     const uniformBuffer = device.createBuffer({
       label: 'uniform buffer',
@@ -168,6 +166,7 @@ const main = async () => {
           view: context.getCurrentTexture().createView(),
           loadOp: 'clear' as const,
           storeOp: 'store' as const,
+          clearValue: { r: 0.2, g: 0.2, b: 0.4, a: 1 },
         },
       ],
     };
@@ -251,10 +250,8 @@ const main = async () => {
       const renderEncoder = device.createCommandEncoder();
       const renderPass = renderEncoder.beginRenderPass(renderPassDescriptor);
       renderPass.setPipeline(renderPipeline);
-      uniformValues.set([time], 0); // time
-      uniformValues.set([POINT_SIZE], 1); // pointSize
+      uniformValues.set([POINT_SIZE], 0); // pointSize
       uniformValues.set([canvas.width, canvas.height], 2); // resolution
-      uniformValues.set([mousePosition?.x || 0, mousePosition?.y || 0], 4); // mousePosition
       device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
       renderPass.setBindGroup(0, uniformBindGroup);
       renderPass.setVertexBuffer(0, vertexBuffer);

@@ -28,7 +28,7 @@ struct Uniforms {
 fn transform(angle: f32, position: vec2f) -> vec2f {
   let resolution = uniforms.resolution;
   let ratio = resolution.x / resolution.y;
-  let size = .25;
+  let size = .125;
   let x = ratio * cos(angle) * (position.x + size) - sin(angle) * (position.y + size) - size;
   let y = ratio * sin(angle) * (position.x - size) + cos(angle) * (position.y - size) + size;
   return vec2f(x, y);
