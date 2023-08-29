@@ -90,19 +90,19 @@ const main = async () => {
 
     device.queue.writeBuffer(vertexBuffer, 0, pointPositions);
 
-    const agentData = new Float32Array(
+    const particleData = new Float32Array(
       [...new Array(POINT_COUNT)]
         .map(() => {
-          const angle = Math.random() * Math.PI * 2; // 0 ~ 2PI
+          const angle = (Math.random() * 2 - 1) * Math.PI; // 0 ~ 2PI
           const speed = Math.random() * 0.01; // 0 ~ 0.01
           return [angle, speed];
         })
         .flat(),
     );
 
-    const agentBuffer = device.createBuffer({
+    const particleBuffer = device.createBuffer({
       label: 'Agent buffer',
-      size: agentData.byteLength,
+      size: particleData.byteLength,
       usage:
         GPUBufferUsage.STORAGE |
         GPUBufferUsage.COPY_SRC |
@@ -110,7 +110,7 @@ const main = async () => {
       mappedAtCreation: false,
     });
 
-    device.queue.writeBuffer(agentBuffer, 0, agentData);
+    device.queue.writeBuffer(particleBuffer, 0, particleData);
 
     const COMPUTE_UNIFORM_BUFFER_SIZE =
       4 * 2 + // deltaTime
@@ -129,7 +129,7 @@ const main = async () => {
       layout: ComputePipeline.getBindGroupLayout(0),
       entries: [
         { binding: 0, resource: { buffer: vertexBuffer } },
-        { binding: 1, resource: { buffer: agentBuffer } },
+        { binding: 1, resource: { buffer: particleBuffer } },
         { binding: 2, resource: { buffer: computeUniformBuffer } },
       ],
     });
