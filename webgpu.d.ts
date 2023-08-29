@@ -15,3 +15,21 @@ declare var GPUBufferUsage: {
   readonly INDIRECT: GPUFlagsConstant;
   readonly QUERY_RESOLVE: GPUFlagsConstant;
 };
+
+interface GPUMapMode {
+  /**
+   * Nominal type branding.
+   * https://github.com/microsoft/TypeScript/pull/33038
+   * @internal
+   */
+  readonly __brand: 'GPUMapMode';
+  readonly READ: GPUFlagsConstant;
+  readonly WRITE: GPUFlagsConstant;
+}
+
+declare var GPUMapMode: {
+  prototype: GPUMapMode;
+  new (): never;
+  readonly READ: GPUFlagsConstant;
+  readonly WRITE: GPUFlagsConstant;
+};
