@@ -14,7 +14,7 @@ if (!gl) {
   throw new Error('No WebGL2 support');
 }
 
-resizeCanvasToDisplaySize(canvas);
+resizeCanvasToDisplaySize(canvas, false);
 
 const vertexShader = compileShader(gl, vertex, gl.VERTEX_SHADER);
 const fragmentShader = compileShader(gl, fragment, gl.FRAGMENT_SHADER);
@@ -34,7 +34,7 @@ const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
 const timeLocation = gl.getUniformLocation(program, 'u_time');
 
 const draw = (time: number) => {
-  resizeCanvasToDisplaySize(canvas);
+  resizeCanvasToDisplaySize(canvas, false);
   gl.viewport(0, 0, canvas.width, canvas.height);
   gl.bufferData(
     gl.ARRAY_BUFFER,
