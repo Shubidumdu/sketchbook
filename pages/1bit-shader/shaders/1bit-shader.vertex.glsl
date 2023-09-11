@@ -7,12 +7,10 @@ in vec3 normal;
 uniform mat4 world;
 uniform mat4 worldViewProjection;
 
-out vec4 vPosition;
 out vec3 vNormal;
 
 void main(){
   vec4 p=vec4(position,1.);
-  vPosition=p;
   gl_Position=worldViewProjection*p;
   vNormal=mat3(world)*normal;
 }

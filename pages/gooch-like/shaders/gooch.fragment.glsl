@@ -21,12 +21,16 @@ vec3 lit(vec3 l,vec3 n,vec3 v){
   return mix(c,highlightColor,s);
 }
 
+vec3 unlit(){
+  vec3 c=coolColor+.25*surfaceColor;
+  return c*.5;
+}
+
 void main(){
+  vec3 unlitColor=unlit();
+  outColor=vec4(unlitColor,1.);
   vec3 n=normalize(vNormal);
   vec3 v=normalize(cameraPosition-vPosition);
-  vec3 unlitColor=coolColor+.25*surfaceColor;
-  outColor=vec4(unlitColor,1.);
-  
   vec3 l=normalize(lightPosition-vPosition);
   float dl=clamp(dot(n,l),0.,1.);
   outColor.rgb+=dl*lightColor*lit(l,n,v);

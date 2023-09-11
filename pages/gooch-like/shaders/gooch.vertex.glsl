@@ -11,8 +11,7 @@ out vec3 vPosition;
 out vec3 vNormal;
 
 void main(){
-  vec4 p=vec4(position,1.);
-  vPosition=p.xyz;
+  vPosition=mat3(world)*position;
   vNormal=mat3(world)*normal;
-  gl_Position=worldViewProjection*p;
+  gl_Position=worldViewProjection*vec4(position,1.);
 }
