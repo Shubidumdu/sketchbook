@@ -8,7 +8,7 @@ import { goochShaderMaterial } from './materials';
 
 engine.displayLoadingUI();
 
-const [coolColor, warmColor, surfaceColor, highlightColor] =
+const [coolColor, warmColor, surfaceColor] =
   document.querySelectorAll<HTMLInputElement>('input');
 
 const LIGHT_POSITION = [-4, 4, 8];
@@ -35,7 +35,6 @@ const main = async () => {
     const coolColorRgb = hexToRgb(coolColor.value, true);
     const warmColorRgb = hexToRgb(warmColor.value, true);
     const surfaceColorRgb = hexToRgb(surfaceColor.value, true);
-    const highlightColorRgb = hexToRgb(highlightColor.value, true);
 
     goochShaderMaterial.setVector3('coolColor', new Vector3(...coolColorRgb));
     goochShaderMaterial.setVector3('warmColor', new Vector3(...warmColorRgb));
@@ -45,7 +44,7 @@ const main = async () => {
     );
     goochShaderMaterial.setVector3(
       'highlightColor',
-      new Vector3(...highlightColorRgb),
+      new Vector3(2., 2., 2.),
     );
     goochShaderMaterial.setVector3('cameraPosition', camera.position);
 
