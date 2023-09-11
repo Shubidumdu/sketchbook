@@ -1,0 +1,12 @@
+.colors {
+  display: flex;
+  padding: 16px;
+  gap: 8px;
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  input {
+    margin-right: 6px;
+  }
+}
