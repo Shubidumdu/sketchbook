@@ -11,8 +11,8 @@ uniform float clickedTime;
 
 out vec4 outColor;
 
-const vec3 lightPosition=vec3(0.,1.,0.);
-const vec3 lightPosition2=vec3(0,-1.,0.);
+const vec3 lightPosition=vec3(0.,.5,-8.);
+const vec3 lightPosition2=vec3(0,-2.,4.);
 
 const float rayThreshold=.99;
 

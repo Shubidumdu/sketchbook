@@ -1,24 +1,24 @@
 import './style.scss';
 import {
   ArcRotateCamera,
-  Color4,
   Effect,
   Engine,
-  HemisphericLight,
-  Mesh,
   MeshBuilder,
-  PhysicsRaycastResult,
-  PointerEventTypes,
+  PostProcess,
   Scene,
   ShaderMaterial,
+  Vector2,
   Vector3,
 } from '@babylonjs/core';
-import customVertexShader from './shaders/vertex.glsl?raw';
-import customFragmentShader from './shaders/fragment.glsl?raw';
+import cloudVertexShader from './shaders/cloud.vertex.glsl?raw';
+import cloudFragmentShader from './shaders/cloud.fragment.glsl?raw';
+import postProcessFragmentShader from './shaders/postprocess.fragment.glsl?raw';
 import { resizeCanvasToDisplaySize } from '../../utils/webgl';
+import { rgbToColor3 } from '../../utils/color';
 
-Effect.ShadersStore['customVertexShader'] = customVertexShader;
-Effect.ShadersStore['customFragmentShader'] = customFragmentShader;
+Effect.ShadersStore['cloudVertexShader'] = cloudVertexShader;
+Effect.ShadersStore['cloudFragmentShader'] = cloudFragmentShader;
+Effect.ShadersStore['postProcessFragmentShader'] = postProcessFragmentShader;
 
 let time = 0;
 
@@ -26,7 +26,8 @@ const createScene = () => {
   const canvas = document.querySelector('canvas')! as HTMLCanvasElement;
   const engine = new Engine(canvas, true);
   const scene = new Scene(engine);
-  scene.clearColor = new Color4(0.8, 0.9, 1, 1);
+
+  scene.clearColor = rgbToColor3(232, 241, 251);
   const camera = new ArcRotateCamera(
     'camera',
     Math.PI / 2,
@@ -37,7 +38,7 @@ const createScene = () => {
   );
   camera.attachControl(canvas, true);
 
-  const material = new ShaderMaterial('customShader', scene, 'custom', {
+  const material = new ShaderMaterial('cloudShader', scene, 'cloud', {
     attributes: ['position', 'normal'],
     uniforms: [
       'world',
@@ -49,23 +50,46 @@ const createScene = () => {
     ],
   });
 
-  const spheres = [...new Array(5)].map(() => createSphere(scene, material));
+  const postProcess = new PostProcess(
+    'PostProcess',
+    'postProcess',
+    ['screenSize'],
+    [],
+    1,
+    camera,
+  );
+
+  postProcess.onApply = (effect) => {
+    effect.setVector2('screenSize', new Vector2(canvas.width, canvas.height));
+  };
+
+  const spheres = [
+    new Vector3(-6, 0, 0),
+    new Vector3(4, 2, -1),
+    new Vector3(-4, 3, -4),
+    new Vector3(-4, -1, 1),
+    new Vector3(2, -3, -2),
+    new Vector3(-3, -2, -3),
+    new Vector3(5, 0, 1),
+    new Vector3(-1, 2, 1),
+    new Vector3(4, -1, -3),
+  ].map((position) => createSphere(scene, material, position));
 
   engine.runRenderLoop(() => {
     resizeCanvasToDisplaySize(canvas);
     time += scene.deltaTime || 0;
     material.setFloat('time', time);
-    spheres.forEach((sphere) => {});
     scene.render();
   });
 };
 
-const createSphere = (scene: Scene, material: ShaderMaterial) => {
-  const size = Math.random() * 2;
-  const position = [Math.random() * 12 - 6, Math.random() * 8 - 4, 0];
+const createSphere = (
+  scene: Scene,
+  material: ShaderMaterial,
+  position: Vector3,
+) => {
   const sphere = MeshBuilder.CreateSphere('sphere', { diameter: 1 }, scene);
-  // sphere.scaling = new Vector3(size, size, size);
-  sphere.setAbsolutePosition(new Vector3(...position));
+  sphere.setAbsolutePosition(position);
   sphere.material = material;
   sphere.rotate(new Vector3(1, 1, 1), Math.random() * Math.PI * 2);
   return sphere;
