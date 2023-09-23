@@ -4,21 +4,29 @@ import {
   Effect,
   Engine,
   MeshBuilder,
-  PostProcess,
   Scene,
   ShaderMaterial,
-  Vector2,
   Vector3,
 } from '@babylonjs/core';
 import cloudVertexShader from './shaders/cloud.vertex.glsl?raw';
 import cloudFragmentShader from './shaders/cloud.fragment.glsl?raw';
-import postProcessFragmentShader from './shaders/postprocess.fragment.glsl?raw';
 import { resizeCanvasToDisplaySize } from '../../utils/webgl';
-import { rgbToColor3 } from '../../utils/color';
+import { rgbaToColor4 } from '../../utils/color';
 
 Effect.ShadersStore['cloudVertexShader'] = cloudVertexShader;
 Effect.ShadersStore['cloudFragmentShader'] = cloudFragmentShader;
-Effect.ShadersStore['postProcessFragmentShader'] = postProcessFragmentShader;
+
+const spherePositions = [
+  new Vector3(-6, 0, 0),
+  new Vector3(4, 2, -1),
+  new Vector3(-4, 3, -4),
+  new Vector3(-4, -1, 1),
+  new Vector3(2, -3, -2),
+  new Vector3(-3, -2, -3),
+  new Vector3(5, 0, 1),
+  new Vector3(-1, 2, 1),
+  new Vector3(4, -1, -3),
+];
 
 let time = 0;
 
@@ -26,8 +34,7 @@ const createScene = () => {
   const canvas = document.querySelector('canvas')! as HTMLCanvasElement;
   const engine = new Engine(canvas, true);
   const scene = new Scene(engine);
-
-  scene.clearColor = rgbToColor3(232, 241, 251);
+  scene.clearColor = rgbaToColor4(232, 241, 251, 1);
   const camera = new ArcRotateCamera(
     'camera',
     Math.PI / 2,
@@ -40,40 +47,10 @@ const createScene = () => {
 
   const material = new ShaderMaterial('cloudShader', scene, 'cloud', {
     attributes: ['position', 'normal'],
-    uniforms: [
-      'world',
-      'worldViewProjection',
-      'time',
-      'pointerRay',
-      'clickedTime',
-      'targetSize',
-    ],
+    uniforms: ['world', 'worldViewProjection', 'time'],
   });
 
-  const postProcess = new PostProcess(
-    'PostProcess',
-    'postProcess',
-    ['screenSize'],
-    [],
-    1,
-    camera,
-  );
-
-  postProcess.onApply = (effect) => {
-    effect.setVector2('screenSize', new Vector2(canvas.width, canvas.height));
-  };
-
-  const spheres = [
-    new Vector3(-6, 0, 0),
-    new Vector3(4, 2, -1),
-    new Vector3(-4, 3, -4),
-    new Vector3(-4, -1, 1),
-    new Vector3(2, -3, -2),
-    new Vector3(-3, -2, -3),
-    new Vector3(5, 0, 1),
-    new Vector3(-1, 2, 1),
-    new Vector3(4, -1, -3),
-  ].map((position) => createSphere(scene, material, position));
+  spherePositions.map((position) => createSphere(scene, material, position));
 
   engine.runRenderLoop(() => {
     resizeCanvasToDisplaySize(canvas);

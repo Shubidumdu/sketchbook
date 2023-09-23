@@ -35,16 +35,16 @@ float noise(in vec3 stu){
 
 #define OCTAVES 8
 float fbm (in vec3 stu) {
-    float value = 0.0;
-    float amplitude = .8;
-    float frequency = 0.;
+  float value = 0.0;
+  float amplitude = .8;
+  float frequency = 0.;
 
-    for (int i = 0; i < OCTAVES; i++) {
-        value += amplitude * noise(stu);
-        stu *= 1.5;
-        amplitude *= .6;
-    }
-    return value;
+  for (int i = 0; i < OCTAVES; i++) {
+      value += amplitude * noise(stu);
+      stu *= 1.5;
+      amplitude *= .6;
+  }
+  return value;
 }
 
 void main(){
