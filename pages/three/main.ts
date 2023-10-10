@@ -3,67 +3,58 @@ import './style.scss';
 import {
   Application,
   BlurFilter,
-  Container,
-  DisplacementFilter,
-  Filter,
   Graphics,
   RenderTexture,
   Sprite,
-  Texture,
 } from 'pixi.js';
-import filterVertexShader from './shaders/filter.vert.glsl?raw';
-import filterFragmentShader from './shaders/filter.frag.glsl?raw';
+import { HashGenerator } from '../../utils/hash';
 
-// const texture = Texture.from(normalMap);
-// const filter = new Filter(filterVertexShader, filterFragmentShader, {
-//   uTexture: texture,
-// });
+const searchParams = new URLSearchParams(location.search);
+const seed = Number(searchParams.get('seed')) | 0;
+const hasher = new HashGenerator(seed);
+
+const seedBtn = document.getElementById('seed')!;
+seedBtn.addEventListener('click', () => {
+  const newSeed = prompt('Please enter a seed number.', '0');
+  const parsed = Number(newSeed);
+  if (isNaN(parsed)) {
+    alert("It's not a number.");
+    return;
+  }
+  window.location.replace(`?seed=${parsed}`);
+});
 
 const app = new Application({
-  background: '#f3f5e4',
-  antialias: true,
+  background: hasher.hexColor(),
   resizeTo: window,
 });
 
+window.onresize = function () {
+  app.renderer.resize(window.innerWidth, window.innerHeight);
+};
+
 document.body.appendChild(app.view as HTMLCanvasElement);
-
-const container = new Container();
-
-app.stage.addChild(container);
 
 const graphics = new Graphics();
 
-graphics.filters = [
-  new BlurFilter(0.8),
-  // new DisplacementFilter(Sprite.from(texture), 4),
-];
+graphics.filters = [new BlurFilter(0.2)];
 
-//
-let renderTexture = RenderTexture.create({
+const renderTexture = RenderTexture.create({
   width: app.screen.width,
   height: app.screen.height,
 });
-let currentTexture = renderTexture;
-let outputSprite = new Sprite(currentTexture);
+const outputSprite = new Sprite(renderTexture);
+
 app.stage.addChild(outputSprite);
-container.addChild(graphics);
-//
+app.stage.addChild(graphics);
 
 let time = 0;
 
-const noise2D = createNoise2D();
+const noise2D = createNoise2D(() => hasher.distribute(0, 1));
 
 app.ticker.add((delta) => {
   time += delta / 24;
-  drawCircle();
-  drawCircle2();
-  drawLine2();
-  drawCircle3();
-  drawCircle4();
-  drawCircularLine2();
-  drawSpot();
-  drawLine();
-  drawCircularLine();
+  drawers.forEach((draw) => draw());
 
   app.renderer.render(app.stage, {
     renderTexture,
@@ -87,13 +78,12 @@ const initCircleDrawer = (options: DrawerOptions) => {
 
   return () => {
     if (x < 0 || x > app.screen.width) {
-      x = app.screen.width * Math.random();
+      x = hasher.distribute(0, app.screen.width);
     }
     if (y < 0 || y > app.screen.height) {
-      y = app.screen.height * Math.random();
+      y = hasher.distribute(0, app.screen.height);
     }
-    x += noise2D(x + time, y) * 24;
-    y += noise2D(x, y + time) * 24;
+    (x += noise2D(x + 1, y) * 24), (y += noise2D(x, y + 1) * 24);
     size = Math.max(noise2D(x, y) * options.size, 1);
     graphics.lineStyle(0);
     graphics.beginFill(options.color);
@@ -111,13 +101,13 @@ const initSpotDrawer = (options: DrawerOptions) => {
   return () => {
     const progress = time - startTime;
     if (progress > Math.PI / 2) {
-      x = Math.random() * app.screen.width;
-      y = Math.random() * app.screen.height;
+      x = hasher.distribute(0, app.screen.width);
+      y = hasher.distribute(0, app.screen.height);
       startTime = time;
       return;
     }
-    x += Math.sin(time) + noise2D(x, y) * 8;
-    y += Math.cos(time) + noise2D(x, y) * 8;
+    (x += Math.sin(time) + noise2D(x + 1, y) * 8),
+      (y += Math.cos(time) + noise2D(x, y + 1) * 8);
     size = Math.cos(progress) * options.size;
     graphics.lineStyle(0);
     graphics.beginFill(options.color);
@@ -134,21 +124,20 @@ const initLineDrawer = (options: DrawerOptions) => {
   let y = options.y;
   let size: number;
   let startTime = time;
-  const random = () => noise2D(x, y) / 2;
-  let radian = Math.random() * Math.PI * 2;
-  let resultRandom = random();
+  let radian = hasher.distribute(0, Math.PI * 2);
+  let resultRandom = hasher.distribute(0, 0.5);
 
   return () => {
     const _time = time;
     const progress = (_time - startTime) / 2;
     if (progress > Math.PI / 2) {
-      x = Math.random() * app.screen.width;
-      y = Math.random() * app.screen.height;
+      x = hasher.distribute(0, app.screen.width);
+      y = hasher.distribute(0, app.screen.height);
       startTime = _time;
-      radian = Math.random() * Math.PI * 2;
+      radian = hasher.distribute(0, Math.PI * 2);
       return;
     }
-    const randomValue = random();
+    const randomValue = hasher.distribute(0, 0.5);
     x +=
       (Math.cos(radian) - Math.sin(radian)) *
       Math.cos(_time + randomValue * 2) *
@@ -174,22 +163,21 @@ const initCircularLineDrawer = (options: DrawerOptions) => {
   let y = options.y;
   let size: number;
   let startTime = time;
-  const random = () => noise2D(x, y) / 2;
-  let resultRandom = random();
-  let radian = Math.random() * Math.PI * 2;
+  let resultRandom = hasher.distribute(0, 0.5);
+  let radian = hasher.distribute(0, Math.PI * 2);
 
   return () => {
     const _time = time;
     const progress = (_time - startTime) / 2;
     if (progress > Math.PI) {
-      x = Math.random() * app.screen.width;
-      y = Math.random() * app.screen.height;
+      x = hasher.distribute(0, app.screen.width);
+      y = hasher.distribute(0, app.screen.height);
       startTime = _time;
-      resultRandom = random();
-      radian = Math.random() * Math.PI * 2;
+      resultRandom = hasher.distribute(0, 0.5);
+      radian = hasher.distribute(0, Math.PI * 2);
       return;
     }
-    const randomValue = random();
+    const randomValue = hasher.distribute(0, 0.5);
     x +=
       (Math.cos(radian) - Math.sin(radian)) *
       Math.cos(_time + randomValue * 4) *
@@ -210,57 +198,43 @@ const initCircularLineDrawer = (options: DrawerOptions) => {
   };
 };
 
-const drawCircle = initCircleDrawer({
-  x: app.screen.width * Math.random(),
-  y: app.screen.height * Math.random(),
-  color: '#000',
-  size: 10,
-});
-const drawCircle2 = initCircleDrawer({
-  x: app.screen.width * Math.random(),
-  y: app.screen.height * Math.random(),
-  color: '#000',
-  size: 8,
-});
-const drawCircle3 = initCircleDrawer({
-  x: app.screen.width * Math.random(),
-  y: app.screen.height * Math.random(),
-  color: '#fff',
-  size: 8,
-});
-const drawCircle4 = initCircleDrawer({
-  x: app.screen.width * Math.random(),
-  y: app.screen.height * Math.random(),
-  color: '#fff',
-  size: 10,
-});
-const drawSpot = initSpotDrawer({
-  x: app.screen.width * Math.random(),
-  y: app.screen.height * Math.random(),
-  color: '#F27999',
-  size: 12,
-});
-const drawLine = initLineDrawer({
-  x: app.screen.width * Math.random(),
-  y: app.screen.height * Math.random(),
-  color: '#74BF04',
-  size: 8,
-});
-const drawLine2 = initLineDrawer({
-  x: app.screen.width * Math.random(),
-  y: app.screen.height * Math.random(),
-  color: '#F29F05',
-  size: 6,
-});
-const drawCircularLine = initCircularLineDrawer({
-  x: app.screen.width * Math.random(),
-  y: app.screen.height * Math.random(),
-  color: '#F21905',
-  size: 8,
-});
-const drawCircularLine2 = initCircularLineDrawer({
-  x: app.screen.width * Math.random(),
-  y: app.screen.height * Math.random(),
-  color: '#1E5CD9',
-  size: 6,
-});
+const MAX_DRAWER_COUNT = 48;
+const DRAWER_TYPE_COUNT = 4;
+
+const initDrawers = () => {
+  return [...new Array(hasher.distributeInt(0, MAX_DRAWER_COUNT))].map(() => {
+    const type = hasher.distributeInt(1, DRAWER_TYPE_COUNT) as 1 | 2 | 3 | 4;
+    switch (type) {
+      case 1:
+        return initCircleDrawer({
+          x: hasher.distribute(0, app.screen.width),
+          y: hasher.distribute(0, app.screen.height),
+          color: hasher.hexColor(),
+          size: hasher.distribute(4, 18),
+        });
+      case 2:
+        return initSpotDrawer({
+          x: hasher.distribute(0, app.screen.width),
+          y: hasher.distribute(0, app.screen.height),
+          color: hasher.hexColor(),
+          size: hasher.distribute(4, 20),
+        });
+      case 3:
+        return initLineDrawer({
+          x: hasher.distribute(0, app.screen.width),
+          y: hasher.distribute(0, app.screen.height),
+          color: hasher.hexColor(),
+          size: hasher.distribute(4, 18),
+        });
+      case 4:
+        return initCircularLineDrawer({
+          x: hasher.distribute(0, app.screen.width),
+          y: hasher.distribute(0, app.screen.height),
+          color: hasher.hexColor(),
+          size: hasher.distribute(4, 18),
+        });
+    }
+  });
+};
+
+const drawers = initDrawers();

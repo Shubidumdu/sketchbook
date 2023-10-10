@@ -38,6 +38,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/node", "npm:20.3.2"],\
             ["path", "npm:0.12.7"],\
             ["pixi.js", "npm:7.3.1"],\
+            ["pure-rand", "npm:6.0.4"],\
             ["sass", "npm:1.63.6"],\
             ["simplex-noise", "npm:4.0.1"],\
             ["typescript", "patch:typescript@npm%3A5.1.5#~builtin<compat/typescript>::version=5.1.5&hash=5da071"],\
@@ -2634,6 +2635,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["pure-rand", [\
+        ["npm:6.0.4", {\
+          "packageLocation": "./.yarn/cache/pure-rand-npm-6.0.4-0821a97867-e1c4e69f8b.zip/node_modules/pure-rand/",\
+          "packageDependencies": [\
+            ["pure-rand", "npm:6.0.4"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["qs", [\
         ["npm:6.11.2", {\
           "packageLocation": "./.yarn/cache/qs-npm-6.11.2-b118bc1c6f-e812f3c590.zip/node_modules/qs/",\
@@ -2815,6 +2825,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/node", "npm:20.3.2"],\
             ["path", "npm:0.12.7"],\
             ["pixi.js", "npm:7.3.1"],\
+            ["pure-rand", "npm:6.0.4"],\
             ["sass", "npm:1.63.6"],\
             ["simplex-noise", "npm:4.0.1"],\
             ["typescript", "patch:typescript@npm%3A5.1.5#~builtin<compat/typescript>::version=5.1.5&hash=5da071"],\
