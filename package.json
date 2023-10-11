@@ -25,6 +25,9 @@
     "@babylonjs/inspector": "^6.6.0",
     "@babylonjs/loaders": "^6.6.0",
     "@babylonjs/materials": "^6.6.0",
-    "@babylonjs/serializers": "^6.6.0"
+    "@babylonjs/serializers": "^6.6.0",
+    "pixi.js": "^7.3.1",
+    "pure-rand": "^6.0.4",
+    "simplex-noise": "^4.0.1"
   }
 }
