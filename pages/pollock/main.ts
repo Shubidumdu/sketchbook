@@ -10,7 +10,7 @@ import {
 import { RandomValueGenerator } from '../../utils/random';
 
 const searchParams = new URLSearchParams(location.search);
-const seed = Number(searchParams.get('seed')) | 0;
+const seed = Number(searchParams.get('seed')) || 0;
 const random = new RandomValueGenerator(seed);
 
 const seedBtn = document.getElementById('seed')!;
