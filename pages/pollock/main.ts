@@ -108,8 +108,6 @@ const initSpotDrawer = (options: DrawerOptions) => {
     graphics.beginFill(options.color);
     graphics.moveTo(x, y);
     graphics.drawCircle(x, y, size);
-    graphics.moveTo(x, y);
-    graphics.drawCircle(x, y, size);
     graphics.endFill();
   };
 };
@@ -144,8 +142,6 @@ const initLineDrawer = (options: DrawerOptions) => {
       Math.sin(progress * 2) * options.size + (options.size / 4) * resultRandom;
     graphics.lineStyle(0);
     graphics.beginFill(options.color);
-    graphics.moveTo(x, y);
-    graphics.drawCircle(x, y, size);
     graphics.moveTo(x, y);
     graphics.drawCircle(x, y, size);
     graphics.endFill();
@@ -183,8 +179,6 @@ const initCircularLineDrawer = (options: DrawerOptions) => {
       Math.sin(progress) * options.size + (options.size / 4) * resultRandom;
     graphics.lineStyle(0);
     graphics.beginFill(options.color);
-    graphics.moveTo(x, y);
-    graphics.drawCircle(x, y, size);
     graphics.moveTo(x, y);
     graphics.drawCircle(x, y, size);
     graphics.endFill();
