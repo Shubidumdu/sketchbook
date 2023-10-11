@@ -47,8 +47,8 @@ let time = 0;
 
 const noise2D = createNoise2D(() => random.distribute(0, 1));
 
-app.ticker.add((delta) => {
-  time += delta / 24;
+app.ticker.add(() => {
+  time += 1 / 48;
   drawers.forEach((draw) => draw());
 
   app.renderer.render(graphics, {
