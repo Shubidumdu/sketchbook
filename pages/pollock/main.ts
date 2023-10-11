@@ -42,7 +42,6 @@ const renderTexture = RenderTexture.create({
 const outputSprite = new Sprite(renderTexture);
 
 app.stage.addChild(outputSprite);
-app.stage.addChild(graphics);
 
 let time = 0;
 
@@ -52,7 +51,7 @@ app.ticker.add((delta) => {
   time += delta / 24;
   drawers.forEach((draw) => draw());
 
-  app.renderer.render(app.stage, {
+  app.renderer.render(graphics, {
     renderTexture,
     clear: false,
   });
