@@ -1,6 +1,6 @@
 import prand, { RandomGenerator } from 'pure-rand';
 
-export class HashGenerator {
+export class RandomValueGenerator {
   private rng: RandomGenerator;
 
   constructor(seed: number) {

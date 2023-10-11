@@ -7,11 +7,11 @@ import {
   RenderTexture,
   Sprite,
 } from 'pixi.js';
-import { HashGenerator } from '../../utils/hash';
+import { RandomValueGenerator } from '../../utils/random';
 
 const searchParams = new URLSearchParams(location.search);
 const seed = Number(searchParams.get('seed')) | 0;
-const hasher = new HashGenerator(seed);
+const hasher = new RandomValueGenerator(seed);
 
 const seedBtn = document.getElementById('seed')!;
 seedBtn.addEventListener('click', () => {
