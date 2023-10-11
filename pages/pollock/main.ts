@@ -29,11 +29,7 @@ const app = new Application({
   resizeTo: window,
 });
 
-window.onresize = function () {
-  app.renderer.resize(window.innerWidth, window.innerHeight);
-};
-
-document.body.appendChild(app.view as HTMLCanvasElement);
+document.body.append(app.view as HTMLCanvasElement);
 
 const graphics = new Graphics();
 
@@ -106,8 +102,7 @@ const initSpotDrawer = (options: DrawerOptions) => {
       startTime = time;
       return;
     }
-    (x += Math.sin(time) + noise2D(x + 1, y) * 8),
-      (y += Math.cos(time) + noise2D(x, y + 1) * 8);
+    (x += noise2D(x + 1, y) * 8), (y += noise2D(x, y + 1) * 8);
     size = Math.cos(progress) * options.size;
     graphics.lineStyle(0);
     graphics.beginFill(options.color);
@@ -128,23 +123,22 @@ const initLineDrawer = (options: DrawerOptions) => {
   let resultRandom = hasher.distribute(0, 0.5);
 
   return () => {
-    const _time = time;
-    const progress = (_time - startTime) / 2;
+    const progress = (time - startTime) / 2;
     if (progress > Math.PI / 2) {
       x = hasher.distribute(0, app.screen.width);
       y = hasher.distribute(0, app.screen.height);
-      startTime = _time;
+      startTime = time;
       radian = hasher.distribute(0, Math.PI * 2);
       return;
     }
     const randomValue = hasher.distribute(0, 0.5);
     x +=
       (Math.cos(radian) - Math.sin(radian)) *
-      Math.cos(_time + randomValue * 2) *
+      Math.cos(time + randomValue * 2) *
       4;
     y +=
       (Math.sin(radian) + Math.sin(radian)) *
-      Math.sin(_time + randomValue * 2) *
+      Math.sin(time + randomValue * 2) *
       4;
     size =
       Math.sin(progress * 2) * options.size + (options.size / 4) * resultRandom;
@@ -167,12 +161,11 @@ const initCircularLineDrawer = (options: DrawerOptions) => {
   let radian = hasher.distribute(0, Math.PI * 2);
 
   return () => {
-    const _time = time;
-    const progress = (_time - startTime) / 2;
+    const progress = (time - startTime) / 2;
     if (progress > Math.PI) {
       x = hasher.distribute(0, app.screen.width);
       y = hasher.distribute(0, app.screen.height);
-      startTime = _time;
+      startTime = time;
       resultRandom = hasher.distribute(0, 0.5);
       radian = hasher.distribute(0, Math.PI * 2);
       return;
@@ -180,11 +173,11 @@ const initCircularLineDrawer = (options: DrawerOptions) => {
     const randomValue = hasher.distribute(0, 0.5);
     x +=
       (Math.cos(radian) - Math.sin(radian)) *
-      Math.cos(_time + randomValue * 4) *
+      Math.cos(time + randomValue * 4) *
       4;
     y +=
       (Math.sin(radian) + Math.sin(radian)) *
-      Math.sin(_time + randomValue * 4) *
+      Math.sin(time + randomValue * 4) *
       4;
     size =
       Math.sin(progress) * options.size + (options.size / 4) * resultRandom;
@@ -198,12 +191,14 @@ const initCircularLineDrawer = (options: DrawerOptions) => {
   };
 };
 
+type DRAWER_TYPE = 1 | 2 | 3 | 4;
+
 const MAX_DRAWER_COUNT = 48;
 const DRAWER_TYPE_COUNT = 4;
 
 const initDrawers = () => {
   return [...new Array(hasher.distributeInt(0, MAX_DRAWER_COUNT))].map(() => {
-    const type = hasher.distributeInt(1, DRAWER_TYPE_COUNT) as 1 | 2 | 3 | 4;
+    const type = hasher.distributeInt(1, DRAWER_TYPE_COUNT) as DRAWER_TYPE;
     switch (type) {
       case 1:
         return initCircleDrawer({
