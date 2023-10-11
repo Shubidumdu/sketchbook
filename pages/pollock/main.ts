@@ -11,7 +11,7 @@ import { RandomValueGenerator } from '../../utils/random';
 
 const searchParams = new URLSearchParams(location.search);
 const seed = Number(searchParams.get('seed')) | 0;
-const hasher = new RandomValueGenerator(seed);
+const random = new RandomValueGenerator(seed);
 
 const seedBtn = document.getElementById('seed')!;
 seedBtn.addEventListener('click', () => {
@@ -25,7 +25,7 @@ seedBtn.addEventListener('click', () => {
 });
 
 const app = new Application({
-  background: hasher.hexColor(),
+  background: random.hexColor(),
   resizeTo: window,
 });
 
@@ -45,7 +45,7 @@ app.stage.addChild(outputSprite);
 
 let time = 0;
 
-const noise2D = createNoise2D(() => hasher.distribute(0, 1));
+const noise2D = createNoise2D(() => random.distribute(0, 1));
 
 app.ticker.add((delta) => {
   time += delta / 24;
@@ -73,10 +73,10 @@ const initCircleDrawer = (options: DrawerOptions) => {
 
   return () => {
     if (x < 0 || x > app.screen.width) {
-      x = hasher.distribute(0, app.screen.width);
+      x = random.distribute(0, app.screen.width);
     }
     if (y < 0 || y > app.screen.height) {
-      y = hasher.distribute(0, app.screen.height);
+      y = random.distribute(0, app.screen.height);
     }
     (x += noise2D(x + 1, y) * 24), (y += noise2D(x, y + 1) * 24);
     size = Math.max(noise2D(x, y) * options.size, 1);
@@ -96,8 +96,8 @@ const initSpotDrawer = (options: DrawerOptions) => {
   return () => {
     const progress = time - startTime;
     if (progress > Math.PI / 2) {
-      x = hasher.distribute(0, app.screen.width);
-      y = hasher.distribute(0, app.screen.height);
+      x = random.distribute(0, app.screen.width);
+      y = random.distribute(0, app.screen.height);
       startTime = time;
       return;
     }
@@ -116,19 +116,19 @@ const initLineDrawer = (options: DrawerOptions) => {
   let y = options.y;
   let size: number;
   let startTime = time;
-  let radian = hasher.distribute(0, Math.PI * 2);
-  let resultRandom = hasher.distribute(0, 0.5);
+  let radian = random.distribute(0, Math.PI * 2);
+  let resultRandom = random.distribute(0, 0.5);
 
   return () => {
     const progress = (time - startTime) / 2;
     if (progress > Math.PI / 2) {
-      x = hasher.distribute(0, app.screen.width);
-      y = hasher.distribute(0, app.screen.height);
+      x = random.distribute(0, app.screen.width);
+      y = random.distribute(0, app.screen.height);
       startTime = time;
-      radian = hasher.distribute(0, Math.PI * 2);
+      radian = random.distribute(0, Math.PI * 2);
       return;
     }
-    const randomValue = hasher.distribute(0, 0.5);
+    const randomValue = random.distribute(0, 0.5);
     x +=
       (Math.cos(radian) - Math.sin(radian)) *
       Math.cos(time + randomValue * 2) *
@@ -152,20 +152,20 @@ const initCircularLineDrawer = (options: DrawerOptions) => {
   let y = options.y;
   let size: number;
   let startTime = time;
-  let resultRandom = hasher.distribute(0, 0.5);
-  let radian = hasher.distribute(0, Math.PI * 2);
+  let resultRandom = random.distribute(0, 0.5);
+  let radian = random.distribute(0, Math.PI * 2);
 
   return () => {
     const progress = (time - startTime) / 2;
     if (progress > Math.PI) {
-      x = hasher.distribute(0, app.screen.width);
-      y = hasher.distribute(0, app.screen.height);
+      x = random.distribute(0, app.screen.width);
+      y = random.distribute(0, app.screen.height);
       startTime = time;
-      resultRandom = hasher.distribute(0, 0.5);
-      radian = hasher.distribute(0, Math.PI * 2);
+      resultRandom = random.distribute(0, 0.5);
+      radian = random.distribute(0, Math.PI * 2);
       return;
     }
-    const randomValue = hasher.distribute(0, 0.5);
+    const randomValue = random.distribute(0, 0.5);
     x +=
       (Math.cos(radian) - Math.sin(radian)) *
       Math.cos(time + randomValue * 4) *
@@ -190,36 +190,36 @@ const MAX_DRAWER_COUNT = 48;
 const DRAWER_TYPE_COUNT = 4;
 
 const initDrawers = () => {
-  return [...new Array(hasher.distributeInt(0, MAX_DRAWER_COUNT))].map(() => {
-    const type = hasher.distributeInt(1, DRAWER_TYPE_COUNT) as DRAWER_TYPE;
+  return [...new Array(random.distributeInt(0, MAX_DRAWER_COUNT))].map(() => {
+    const type = random.distributeInt(1, DRAWER_TYPE_COUNT) as DRAWER_TYPE;
     switch (type) {
       case 1:
         return initCircleDrawer({
-          x: hasher.distribute(0, app.screen.width),
-          y: hasher.distribute(0, app.screen.height),
-          color: hasher.hexColor(),
-          size: hasher.distribute(4, 18),
+          x: random.distribute(0, app.screen.width),
+          y: random.distribute(0, app.screen.height),
+          color: random.hexColor(),
+          size: random.distribute(4, 18),
         });
       case 2:
         return initSpotDrawer({
-          x: hasher.distribute(0, app.screen.width),
-          y: hasher.distribute(0, app.screen.height),
-          color: hasher.hexColor(),
-          size: hasher.distribute(4, 20),
+          x: random.distribute(0, app.screen.width),
+          y: random.distribute(0, app.screen.height),
+          color: random.hexColor(),
+          size: random.distribute(4, 20),
         });
       case 3:
         return initLineDrawer({
-          x: hasher.distribute(0, app.screen.width),
-          y: hasher.distribute(0, app.screen.height),
-          color: hasher.hexColor(),
-          size: hasher.distribute(4, 18),
+          x: random.distribute(0, app.screen.width),
+          y: random.distribute(0, app.screen.height),
+          color: random.hexColor(),
+          size: random.distribute(4, 18),
         });
       case 4:
         return initCircularLineDrawer({
-          x: hasher.distribute(0, app.screen.width),
-          y: hasher.distribute(0, app.screen.height),
-          color: hasher.hexColor(),
-          size: hasher.distribute(4, 18),
+          x: random.distribute(0, app.screen.width),
+          y: random.distribute(0, app.screen.height),
+          color: random.hexColor(),
+          size: random.distribute(4, 18),
         });
     }
   });
