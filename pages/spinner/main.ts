@@ -2,11 +2,14 @@ import {
   AbstractMesh,
   ArcRotateCamera,
   Engine,
+  Material,
   Mesh,
+  MeshBuilder,
   Node,
   PickingInfo,
   Scene,
   SceneLoader,
+  StandardMaterial,
   Vector3,
 } from '@babylonjs/core';
 import '@babylonjs/loaders';
@@ -27,6 +30,14 @@ const main = async () => {
   const canvas = document.getElementById('canvas') as HTMLCanvasElement;
   const engine = new Engine(canvas, true);
   const scene = new Scene(engine);
+  const clickable = MeshBuilder.CreateCylinder('ClickableArea', {
+    diameter: 9.5,
+    height: 1.2,
+    tessellation: 32,
+  });
+  const clickableMaterial = new StandardMaterial('ClickableMaterial', scene);
+  clickableMaterial.alpha = 0;
+  clickable.material = clickableMaterial;
 
   const handlePointerUp = () => {
     const point = scene.pick(scene.pointerX, scene.pointerY).pickedPoint;
@@ -43,6 +54,7 @@ const main = async () => {
       velocity = direction * (distance / time) * 100;
     }
     startPickInfo = null;
+    endPickTime = performance.now();
     camera.attachControl(canvas, true);
     canvas.removeEventListener('pointermove', handlePointerMove);
     canvas.removeEventListener('pointerup', handlePointerUp);
@@ -112,6 +124,7 @@ const main = async () => {
   );
 
   engine.runRenderLoop(() => {
+    console.log(velocity);
     scene.render();
     if (meshes.spinner) {
       meshes.spinner.rotation.y += angularVelocity(velocity, endPickTime);
@@ -119,7 +132,7 @@ const main = async () => {
     engine.resize();
   });
 
-  Inspector.Show(scene, {});
+  // Inspector.Show(scene, {});
 };
 
 const angularVelocity = (initialVelocity: number, startTime: number) => {
