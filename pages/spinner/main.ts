@@ -5,16 +5,19 @@ import {
   Material,
   Mesh,
   MeshBuilder,
+  MotionBlurPostProcess,
   Node,
   PickingInfo,
   Scene,
   SceneLoader,
+  Sound,
   StandardMaterial,
   Vector3,
 } from '@babylonjs/core';
 import '@babylonjs/loaders';
 import './style.scss';
 import spinnerPath from './spinner.glb';
+import spinSoundPath from './spinner.mp3';
 import { Inspector } from '@babylonjs/inspector';
 
 const rootUrl = spinnerPath.split('/');
@@ -30,6 +33,36 @@ const main = async () => {
   const canvas = document.getElementById('canvas') as HTMLCanvasElement;
   const engine = new Engine(canvas, true);
   const scene = new Scene(engine);
+
+  const camera = new ArcRotateCamera(
+    'camera',
+    Math.PI / 2,
+    -Math.PI,
+    15,
+    Vector3.Zero(),
+    scene,
+  );
+  camera.target = Vector3.Zero();
+  camera.attachControl(canvas, true);
+  engine.displayLoadingUI();
+
+  const motionBlur = new MotionBlurPostProcess(
+    'motionBlur',
+    scene,
+    1.0,
+    camera,
+  );
+
+  const spinSound = new Sound('SpinSound', spinSoundPath, scene, null, {
+    volume: 0,
+    offset: 2,
+    length: 2,
+  });
+
+  spinSound.onEndedObservable.add(() => {
+    spinSound.play();
+  });
+
   const clickable = MeshBuilder.CreateCylinder('ClickableArea', {
     diameter: 9.5,
     height: 1.2,
@@ -51,10 +84,11 @@ const main = async () => {
       const cross = Vector3.Cross(_point, _startPoint);
       const direction = cross.y > 0 ? -1 : 1;
       const time = performance.now() - startPickTime;
-      velocity = direction * (distance / time) * 100;
+      velocity = direction * (distance / time) * 50;
     }
     startPickInfo = null;
     endPickTime = performance.now();
+    spinSound.play();
     camera.attachControl(canvas, true);
     canvas.removeEventListener('pointermove', handlePointerMove);
     canvas.removeEventListener('pointerup', handlePointerUp);
@@ -95,18 +129,6 @@ const main = async () => {
 
   canvas.addEventListener('pointerdown', handlePointerDown);
 
-  const camera = new ArcRotateCamera(
-    'camera',
-    Math.PI / 2,
-    -Math.PI,
-    15,
-    Vector3.Zero(),
-    scene,
-  );
-  camera.target = Vector3.Zero();
-  camera.attachControl(canvas, true);
-  engine.displayLoadingUI();
-
   SceneLoader.ImportMesh(
     'Spinner',
     rootUrl.join('/') + '/',
@@ -132,7 +154,7 @@ const main = async () => {
     engine.resize();
   });
 
-  // Inspector.Show(scene, {});
+  Inspector.Show(scene, {});
 };
 
 const angularVelocity = (initialVelocity: number, startTime: number) => {
