@@ -12,6 +12,7 @@ const main = async () => {
   const canvas = document.getElementById('canvas') as HTMLCanvasElement;
   const engine = new Engine(canvas, true);
   const scene = new Scene(engine);
+  engine.displayLoadingUI();
   scene.clearColor = Color4.FromHexString('#212E33');
   const { spinner } = await loadModel(scene);
   setupCamera(scene);
