@@ -1,6 +1,6 @@
 import '@babylonjs/loaders';
 import './style.scss';
-import { Engine, Scene } from '@babylonjs/core';
+import { Color3, Color4, Engine, Scene } from '@babylonjs/core';
 import { setupCamera } from './camera';
 import { loadModel } from './meshes';
 import { setupEventHandlers } from './event';
@@ -12,11 +12,19 @@ const main = async () => {
   const canvas = document.getElementById('canvas') as HTMLCanvasElement;
   const engine = new Engine(canvas, true);
   const scene = new Scene(engine);
+  scene.clearColor = Color4.FromHexString('#212E33');
   const { spinner } = await loadModel(scene);
   setupCamera(scene);
   setupMotionBlur(scene);
   setupEventHandlers(scene, state, spinner);
-  scene.createDefaultEnvironment();
+  const environment = scene.createDefaultEnvironment({
+    createGround: true,
+    createSkybox: false,
+  });
+  if (environment?.groundMaterial) {
+    environment.groundMaterial.primaryColor = Color3.FromHexString('#637A82');
+  }
+  scene.createDefaultLight(true);
   engine.hideLoadingUI();
 
   engine.runRenderLoop(() => {

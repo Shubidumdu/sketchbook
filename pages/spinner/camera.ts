@@ -4,7 +4,7 @@ export const setupCamera = (scene: Scene) => {
   const camera = new ArcRotateCamera(
     'camera',
     Math.PI / 2,
-    -Math.PI,
+    0.87,
     15,
     Vector3.Zero(),
     scene,
