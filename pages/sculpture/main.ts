@@ -8,7 +8,7 @@ import {
 } from '@babylonjs/core';
 import '@babylonjs/loaders';
 import './style.scss';
-import sculpturePath from  './sculpture.glb';
+import sculpturePath from './sculpture.glb';
 
 const rootUrl = sculpturePath.split('/');
 const sceneFile = rootUrl.pop();
@@ -17,7 +17,14 @@ const main = async () => {
   const canvas = document.getElementById('canvas') as HTMLCanvasElement;
   const engine = new Engine(canvas, true);
   const scene = new Scene(engine);
-  const camera = new ArcRotateCamera('camera', 2.24, 1.68, 7, Vector3.Zero(), scene);
+  const camera = new ArcRotateCamera(
+    'camera',
+    2.24,
+    1.68,
+    7,
+    Vector3.Zero(),
+    scene,
+  );
   camera.target = Vector3.Zero();
   camera.attachControl(canvas, true);
   engine.displayLoadingUI();
@@ -28,7 +35,7 @@ const main = async () => {
     sceneFile,
     scene,
     function () {
-      const [headMaterial, eyeMaterial]  = scene.materials as PBRMaterial[];
+      const [headMaterial, eyeMaterial] = scene.materials as PBRMaterial[];
       headMaterial.metallic = 1;
       headMaterial.roughness = 0.3;
       eyeMaterial.metallic = 1;
@@ -45,6 +52,6 @@ const main = async () => {
     scene.render();
     engine.resize();
   });
-};  
+};
 
 main();
