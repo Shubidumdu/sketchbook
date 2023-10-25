@@ -28,8 +28,12 @@ declare module '*.fx' {
   export default value;
 }
 
-
 declare module '*.fx?raw' {
+  const value: string;
+  export default value;
+}
+
+declare module '*.mp3' {
   const value: string;
   export default value;
 }
