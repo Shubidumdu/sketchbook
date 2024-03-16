@@ -5,8 +5,8 @@ struct Uniforms {
 
 struct Particle {
   position: vec3<f32>,
-  // direction: vec3<f32>,
-  // velocity: vec3<f32>,
+  direction: vec3<f32>,
+  velocity: vec3<f32>,
 }
 
 @binding(0) @group(0) var<uniform> uniforms: Uniforms;
@@ -16,10 +16,9 @@ struct Particle {
   @builtin(global_invocation_id) globalId: vec3<u32>
 ) {
   let index: u32 = globalId.x;
+  let deltaTime = uniforms.deltaTime;
 
-  if (index >= uniforms.particleCount) {
-    return;
-  }
-
-  particles[globalId.x].position.x += uniforms.deltaTime;
+  particles[index].position.x += deltaTime;
+  particles[index].position.y += deltaTime;
+  particles[index].position.z += deltaTime;
 }
