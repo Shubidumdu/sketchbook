@@ -5,8 +5,8 @@ struct Uniforms {
 
 struct Particle {
   position: vec3<f32>,
-  direction: vec3<f32>,
-  velocity: vec3<f32>,
+  // direction: vec3<f32>,
+  // velocity: vec3<f32>,
 }
 
 @binding(0) @group(0) var<uniform> uniforms: Uniforms;

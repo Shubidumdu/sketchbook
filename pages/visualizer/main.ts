@@ -34,22 +34,21 @@ const camera = new ArcRotateCamera(
 );
 camera.attachControl(canvas, true);
 
-const PARTICLE_NUMS = 100_000;
+const PARTICLE_NUMS = 100;
 
 // Compute
-
 const initialParticles = new Float32Array(
   [...new Array(PARTICLE_NUMS)]
     .map(() => [
       Math.random() * 2 - 1, // position
       Math.random() * 2 - 1,
       Math.random() * 2 - 1,
-      Math.random() * 2 - 1, // p_direction
-      Math.random() * 2 - 1,
-      Math.random() * 2 - 1,
-      Math.random() * 2 - 1, // velocity
-      Math.random() * 2 - 1,
-      Math.random() * 2 - 1,
+      // Math.random() * 2 - 1, // p_direction
+      // Math.random() * 2 - 1,
+      // Math.random() * 2 - 1,
+      // Math.random() * 2 - 1, // velocity
+      // Math.random() * 2 - 1,
+      // Math.random() * 2 - 1,
     ])
     .flat(),
 );
@@ -65,7 +64,7 @@ const particleBuffer = new StorageBuffer(
   engine,
   initialParticles.byteLength,
   Constants.BUFFER_CREATIONFLAG_STORAGE |
-    Constants.BUFFER_CREATIONFLAG_VERTEX |
+    // Constants.BUFFER_CREATIONFLAG_VERTEX |
     Constants.BUFFER_CREATIONFLAG_READ |
     Constants.BUFFER_CREATIONFLAG_WRITE,
 );
@@ -89,63 +88,24 @@ const computeShader = new ComputeShader(
 computeShader.setUniformBuffer('uniforms', uniforms);
 computeShader.setStorageBuffer('particles', particleBuffer);
 
-// Vertex
+const mesh = MeshBuilder.CreatePolyhedron('oct', {
+  type: 3,
+  size: 1,
+  updatable: true,
+});
 
-const particleMeshMaterial = new ShaderMaterial(
-  'particle',
-  scene,
-  {
-    vertexSource: particleVertexShaderSource,
-    fragmentSource: particleFragmentShaderSource,
-  },
-  {
-    attributes: ['p_position', 'p_direction', 'velocity', 'normal'],
-    uniforms: ['time', 'world', 'worldViewProjection'],
-  },
-);
+[...Array(PARTICLE_NUMS - 1)].forEach((_, index) => {
+  const instanced = mesh.createInstance(`mesh${index}`);
+  instanced.setAbsolutePosition(
+    new Vector3(
+      initialParticles[index * 3 + 0],
+      initialParticles[index * 3 + 1],
+      initialParticles[index * 3 + 2],
+    ),
+  );
+});
 
-const vertexPositionBuffer = new VertexBuffer(
-  engine,
-  particleBuffer.getBuffer(),
-  's_position',
-  false,
-  false,
-  9,
-  true,
-  0,
-  3,
-);
-
-const vertexDirectionBuffer = new VertexBuffer(
-  engine,
-  particleBuffer.getBuffer(),
-  'p_direction',
-  false,
-  false,
-  9,
-  true,
-  3,
-  3,
-);
-
-const vertexVelocityBuffer = new VertexBuffer(
-  engine,
-  particleBuffer.getBuffer(),
-  'velocity',
-  false,
-  false,
-  9,
-  true,
-  6,
-  3,
-);
-
-const mesh = MeshBuilder.CreatePolyhedron(
-  'oct',
-  { type: 3, size: 1, updatable: true },
-  scene,
-);
-mesh.material = particleMeshMaterial;
+// mesh.material = particleMeshMaterial;
 
 // particleBuffer.getBuffer()
 
@@ -153,7 +113,7 @@ mesh.material = particleMeshMaterial;
 // mesh.createInstance('i0');
 // mesh.createInstance('i0');
 
-console.log(mesh.getVertexBuffer('position')?.getFloatData());
+// console.log(mesh.getVertexBuffer('position')?.getFloatData());
 
 // mesh.setVerticesBuffer(vertexPositionBuffer);
 // mesh.setVerticesBuffer(vertexDirectionBuffer);
@@ -167,7 +127,7 @@ let time = 0;
 engine.runRenderLoop(() => {
   computeShader.dispatch(Math.ceil(PARTICLE_NUMS / 64));
   time += scene.deltaTime;
-  particleMeshMaterial.setFloat('time', time);
+  // particleMeshMaterial.setFloat('time', time);
   scene.render();
   engine.resize();
 });
