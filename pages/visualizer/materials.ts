@@ -8,3 +8,17 @@ const createGroundMaterial = (scene: Scene) => {
     { shaderLanguage: ShaderLanguage.WGSL },
   );
 };
+
+const particleMeshMaterial = (scene: Scene) => {
+  const shader = new ShaderMaterial(
+    'particle',
+    scene,
+    {
+      vertexSource: ``,
+      fragmentSource: ``,
+    },
+    {
+      attributes: ['position'],
+    },
+  );
+};

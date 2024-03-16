@@ -1,17 +1,22 @@
-import { createGround } from './meshes';
 import './style.scss';
 import {
   ArcRotateCamera,
   Color4,
   ComputeShader,
   Constants,
-  HemisphericLight,
+  MeshBuilder,
   Scene,
+  ShaderMaterial,
   StorageBuffer,
   UniformBuffer,
   Vector3,
+  VertexBuffer,
   WebGPUEngine,
 } from '@babylonjs/core';
+import computeShaderSource from './shaders/compute.wgsl?raw';
+import particleFragmentShaderSource from './shaders/fragment.glsl?raw';
+import particleVertexShaderSource from './shaders/vertex.glsl?raw';
+import { Inspector } from '@babylonjs/inspector';
 
 const canvas = document.getElementById('babylon') as HTMLCanvasElement;
 const engine = new WebGPUEngine(canvas);
@@ -22,95 +27,147 @@ scene.clearColor = Color4.FromHexString('#212E33');
 const camera = new ArcRotateCamera(
   'camera',
   -Math.PI / 2,
-  Math.PI / 8,
-  200,
+  Math.PI / 2,
+  10,
   Vector3.Zero(),
   scene,
 );
 camera.attachControl(canvas, true);
 
-const light = new HemisphericLight('light', new Vector3(1, 1, 1), scene);
+const PARTICLE_NUMS = 100_000;
 
-const ground = createGround(scene);
+// Compute
 
-const PARTICLE_NUMS = 100;
-
-const initialData = new Float32Array(
+const initialParticles = new Float32Array(
   [...new Array(PARTICLE_NUMS)]
-    .map(() => [Math.random() * 2 - 1, Math.random() * 2 - 1])
+    .map(() => [
+      Math.random() * 2 - 1, // position
+      Math.random() * 2 - 1,
+      Math.random() * 2 - 1,
+      Math.random() * 2 - 1, // p_direction
+      Math.random() * 2 - 1,
+      Math.random() * 2 - 1,
+      Math.random() * 2 - 1, // velocity
+      Math.random() * 2 - 1,
+      Math.random() * 2 - 1,
+    ])
     .flat(),
 );
 
-const params = new UniformBuffer(engine, undefined, undefined, 'params');
-params.addFloat3('direction', 0.1, 0.1, 0.1);
-params.addUniform('deltaTime', 1);
+const uniforms = new UniformBuffer(engine, undefined, undefined, 'uniforms');
+uniforms.addUniform('deltaTime', 1);
+uniforms.updateFloat('deltaTime', 1);
+uniforms.addUniform('particleCount', PARTICLE_NUMS);
+uniforms.updateUInt('particleCount', PARTICLE_NUMS);
+uniforms.update();
 
-params.updateFloat3('direction', 0.1, 0.1, 0.1);
-params.updateFloat('deltaTime', 1);
-
-const storageBuffer = new StorageBuffer(
+const particleBuffer = new StorageBuffer(
   engine,
-  initialData.byteLength,
-  Constants.BUFFER_CREATIONFLAG_VERTEX |
-    Constants.BUFFER_CREATIONFLAG_WRITE |
-    Constants.BUFFER_CREATIONFLAG_READ,
+  initialParticles.byteLength,
+  Constants.BUFFER_CREATIONFLAG_STORAGE |
+    Constants.BUFFER_CREATIONFLAG_VERTEX |
+    Constants.BUFFER_CREATIONFLAG_READ |
+    Constants.BUFFER_CREATIONFLAG_WRITE,
 );
 
-console.log(initialData);
+particleBuffer.update(initialParticles);
 
-storageBuffer.update(initialData);
-
-const cs1 = new ComputeShader(
-  'cs1',
+const computeShader = new ComputeShader(
+  'computeShader',
   engine,
   {
-    computeSource: `
-struct Params {
-  direction: vec3f,
-  deltaTime: f32,
-}
-
-@group(0) @binding(0) var<uniform> params: Params;
-@group(0) @binding(1) var<storage, read_write> positions: array<vec2f>;
-
-@compute @workgroup_size(64, 1, 1) fn main(
-  @builtin(global_invocation_id) globalId: vec3<u32>
-) {
-  let deltaTime = params.deltaTime * .5;
-  positions[globalId.x] += vec2f(0.0001, 0.0001);
-}
-    `,
+    computeSource: computeShaderSource,
   },
   {
     bindingsMapping: {
-      params: { group: 0, binding: 0 },
-      positions: { group: 0, binding: 1 },
+      uniforms: { group: 0, binding: 0 },
+      particles: { group: 0, binding: 1 },
     },
   },
 );
 
-cs1.setUniformBuffer('params', params);
-cs1.setStorageBuffer('positions', storageBuffer);
+computeShader.setUniformBuffer('uniforms', uniforms);
+computeShader.setStorageBuffer('particles', particleBuffer);
 
-cs1.dispatch(Math.ceil(PARTICLE_NUMS / 64));
-const result = await storageBuffer.read(
-  undefined,
-  undefined,
-  new Float32Array(PARTICLE_NUMS * 2),
-  true,
+// Vertex
+
+const particleMeshMaterial = new ShaderMaterial(
+  'particle',
+  scene,
+  {
+    vertexSource: particleVertexShaderSource,
+    fragmentSource: particleFragmentShaderSource,
+  },
+  {
+    attributes: ['p_position', 'p_direction', 'velocity', 'normal'],
+    uniforms: ['time', 'world', 'worldViewProjection'],
+  },
 );
 
-console.log(result);
+const vertexPositionBuffer = new VertexBuffer(
+  engine,
+  particleBuffer.getBuffer(),
+  's_position',
+  false,
+  false,
+  9,
+  true,
+  0,
+  3,
+);
 
-engine.runRenderLoop(async () => {
-  cs1.dispatch(Math.ceil(PARTICLE_NUMS / 64));
-  const result = await storageBuffer.read(
-    undefined,
-    undefined,
-    new Float32Array(PARTICLE_NUMS * 2),
-    true,
-  );
-  console.log(result);
+const vertexDirectionBuffer = new VertexBuffer(
+  engine,
+  particleBuffer.getBuffer(),
+  'p_direction',
+  false,
+  false,
+  9,
+  true,
+  3,
+  3,
+);
+
+const vertexVelocityBuffer = new VertexBuffer(
+  engine,
+  particleBuffer.getBuffer(),
+  'velocity',
+  false,
+  false,
+  9,
+  true,
+  6,
+  3,
+);
+
+const mesh = MeshBuilder.CreatePolyhedron(
+  'oct',
+  { type: 3, size: 1, updatable: true },
+  scene,
+);
+mesh.material = particleMeshMaterial;
+
+// particleBuffer.getBuffer()
+
+// mesh.thinInstanceSetBuffer("a", )
+// mesh.createInstance('i0');
+// mesh.createInstance('i0');
+
+console.log(mesh.getVertexBuffer('position')?.getFloatData());
+
+// mesh.setVerticesBuffer(vertexPositionBuffer);
+// mesh.setVerticesBuffer(vertexDirectionBuffer);
+// mesh.setVerticesBuffer(vertexVelocityBuffer);
+
+// const positionBuffer = mesh.getVertexBuffer(VertexBuffer.PositionKind);
+// console.log(mesh.getVertexBuffer('p_direction'));
+
+let time = 0;
+
+engine.runRenderLoop(() => {
+  computeShader.dispatch(Math.ceil(PARTICLE_NUMS / 64));
+  time += scene.deltaTime;
+  particleMeshMaterial.setFloat('time', time);
   scene.render();
   engine.resize();
 });
