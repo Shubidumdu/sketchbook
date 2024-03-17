@@ -27,13 +27,14 @@ const camera = new ArcRotateCamera(
   'camera',
   -Math.PI / 2,
   Math.PI / 2,
-  100,
+  280,
   Vector3.Zero(),
   scene,
 );
 camera.attachControl(canvas, true);
 
-const PARTICLE_NUMS = 5_000;
+const PARTICLE_NUMS = 1_000;
+const RADIUS = 60;
 
 const mesh = MeshBuilder.CreatePolyhedron('oct', { type: 3, size: 1 }, scene);
 mesh.forcedInstanceCount = PARTICLE_NUMS;
@@ -74,8 +75,8 @@ mesh.setVerticesBuffer(vertexPositionBuffer);
 
 const initialParticles = new Float32Array(
   [...new Array(PARTICLE_NUMS)]
-    .map((_, i) => {
-      const d = 80;
+    .map(() => {
+      const d = 1000;
       const x = d * (2 * Math.random() - 1);
       const y = d * (2 * Math.random() - 1);
       const z = d * (2 * Math.random() - 1);
@@ -84,11 +85,11 @@ const initialParticles = new Float32Array(
         y,
         z,
         0,
-        Math.random() * 2 - 1, // p_direction
-        Math.random() * 2 - 1,
-        Math.random() * 2 - 1,
+        0, // velocity
         0,
-        Math.random() * 2 - 1, // velocity
+        0,
+        0,
+        Math.random() * 2 - 1, // acceleration
         Math.random() * 2 - 1,
         Math.random() * 2 - 1,
         0,
@@ -98,16 +99,21 @@ const initialParticles = new Float32Array(
 );
 
 const uniforms = new UniformBuffer(engine, undefined, undefined, 'uniforms');
+
 uniforms.addUniform('deltaTime', 1);
-uniforms.updateFloat('deltaTime', 0.001);
+uniforms.addUniform('radius', 1);
 uniforms.addUniform('particleCount', 1);
-uniforms.updateUInt('particleCount', PARTICLE_NUMS);
+
+uniforms.updateFloat('deltaTime', 0.001);
+uniforms.updateFloat('radius', RADIUS);
+uniforms.updateInt('particleCount', PARTICLE_NUMS);
 uniforms.update();
 
 const particleBuffer = new StorageBuffer(
   engine,
   initialParticles.byteLength,
-  Constants.BUFFER_CREATIONFLAG_VERTEX |
+  Constants.BUFFER_CREATIONFLAG_STORAGE |
+    Constants.BUFFER_CREATIONFLAG_VERTEX |
     Constants.BUFFER_CREATIONFLAG_READWRITE,
 );
 
@@ -149,6 +155,7 @@ engine.runRenderLoop(() => {
 
 scene.onBeforeRenderObservable.add(async () => {
   uniforms.updateFloat('deltaTime', scene.deltaTime);
-  computeShader.dispatch(Math.ceil(PARTICLE_NUMS / 64));
+  uniforms.update();
+  computeShader.dispatchWhenReady(Math.ceil(PARTICLE_NUMS / 64));
   mesh.setVerticesBuffer(positionBuffer, false);
 });
