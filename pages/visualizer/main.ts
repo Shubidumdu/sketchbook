@@ -33,7 +33,7 @@ const camera = new ArcRotateCamera(
 );
 camera.attachControl(canvas, true);
 
-const PARTICLE_NUMS = 10;
+const PARTICLE_NUMS = 5_000;
 
 const mesh = MeshBuilder.CreatePolyhedron('oct', { type: 3, size: 1 }, scene);
 mesh.forcedInstanceCount = PARTICLE_NUMS;
@@ -74,27 +74,37 @@ mesh.setVerticesBuffer(vertexPositionBuffer);
 
 const initialParticles = new Float32Array(
   [...new Array(PARTICLE_NUMS)]
-    .map(() => [
-      Math.random() * 2 - 1, // position
-      Math.random() * 2 - 1,
-      Math.random() * 2 - 1,
-      0,
-      Math.random() * 2 - 1, // p_direction
-      Math.random() * 2 - 1,
-      Math.random() * 2 - 1,
-      0,
-      Math.random() * 2 - 1, // velocity
-      Math.random() * 2 - 1,
-      Math.random() * 2 - 1,
-      0,
-    ])
+    .map(() => {
+      const radian = 2 * Math.PI * Math.random();
+      const r = 4;
+      const x = 2 * Math.PI * (2 * Math.random() - 1);
+      const y = 2 * Math.PI * (2 * Math.random() - 1);
+      const z =
+        (Math.random() > 0.5 ? 1 : -1) *
+        Math.sqrt(Math.pow(r, 2) - Math.pow(x, 2) - Math.pow(y, 2));
+      console.log(z);
+      return [
+        x, // position
+        y,
+        z,
+        0,
+        Math.random() * 2 - 1, // p_direction
+        Math.random() * 2 - 1,
+        Math.random() * 2 - 1,
+        0,
+        Math.random() * 2 - 1, // velocity
+        Math.random() * 2 - 1,
+        Math.random() * 2 - 1,
+        0,
+      ];
+    })
     .flat(),
 );
 
 const uniforms = new UniformBuffer(engine, undefined, undefined, 'uniforms');
 uniforms.addUniform('deltaTime', 1);
 uniforms.updateFloat('deltaTime', 0.001);
-uniforms.addUniform('particleCount', PARTICLE_NUMS);
+uniforms.addUniform('particleCount', 1);
 uniforms.updateUInt('particleCount', PARTICLE_NUMS);
 uniforms.update();
 

@@ -18,7 +18,5 @@ struct Particle {
   let index: u32 = globalId.x;
   let deltaTime = uniforms.deltaTime;
 
-  particles[index].position.x += deltaTime;
-  particles[index].position.y += deltaTime;
-  particles[index].position.z += deltaTime;
+  particles[index].position.x += 0;
 }
