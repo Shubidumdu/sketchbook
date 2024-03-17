@@ -27,7 +27,7 @@ const camera = new ArcRotateCamera(
   'camera',
   -Math.PI / 2,
   Math.PI / 2,
-  10,
+  100,
   Vector3.Zero(),
   scene,
 );
@@ -74,15 +74,11 @@ mesh.setVerticesBuffer(vertexPositionBuffer);
 
 const initialParticles = new Float32Array(
   [...new Array(PARTICLE_NUMS)]
-    .map(() => {
-      const radian = 2 * Math.PI * Math.random();
-      const r = 4;
-      const x = 2 * Math.PI * (2 * Math.random() - 1);
-      const y = 2 * Math.PI * (2 * Math.random() - 1);
-      const z =
-        (Math.random() > 0.5 ? 1 : -1) *
-        Math.sqrt(Math.pow(r, 2) - Math.pow(x, 2) - Math.pow(y, 2));
-      console.log(z);
+    .map((_, i) => {
+      const d = 80;
+      const x = d * (2 * Math.random() - 1);
+      const y = d * (2 * Math.random() - 1);
+      const z = d * (2 * Math.random() - 1);
       return [
         x, // position
         y,
