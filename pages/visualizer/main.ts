@@ -33,8 +33,8 @@ const camera = new ArcRotateCamera(
 );
 camera.attachControl(canvas, true);
 
-const PARTICLE_NUMS = 1_000;
-const RADIUS = 60;
+const PARTICLE_NUMS = 20_000;
+const RADIUS = 80;
 
 const mesh = MeshBuilder.CreatePolyhedron('oct', { type: 3, size: 1 }, scene);
 mesh.forcedInstanceCount = PARTICLE_NUMS;
@@ -47,7 +47,14 @@ const particleMeshMaterial = new ShaderMaterial(
     fragmentSource: particleFragmentShaderSource,
   },
   {
-    attributes: ['position', 'v_position', 'p_position', 'velocity', 'normal'],
+    attributes: [
+      'position',
+      'v_position',
+      'p_position',
+      'velocity',
+      'normal',
+      'noise',
+    ],
     uniforms: ['time', 'world', 'worldViewProjection'],
   },
 );
@@ -88,8 +95,8 @@ const initialParticles = new Float32Array(
         0, // velocity
         0,
         0,
-        0,
-        Math.random() * 2 - 1, // acceleration
+        0, // noise
+        Math.random() * 2 - 1, // rotation
         Math.random() * 2 - 1,
         Math.random() * 2 - 1,
         0,
@@ -131,6 +138,18 @@ const positionBuffer = new VertexBuffer(
   4,
 );
 
+const noiseBuffer = new VertexBuffer(
+  engine,
+  particleBuffer.getBuffer(),
+  'noise',
+  false,
+  false,
+  12,
+  true,
+  7,
+  1,
+);
+
 const computeShader = new ComputeShader(
   'computeShader',
   engine,
@@ -153,9 +172,10 @@ engine.runRenderLoop(() => {
   engine.resize();
 });
 
-scene.onBeforeRenderObservable.add(async () => {
+scene.onBeforeRenderObservable.add(() => {
   uniforms.updateFloat('deltaTime', scene.deltaTime);
   uniforms.update();
-  computeShader.dispatchWhenReady(Math.ceil(PARTICLE_NUMS / 64));
+  computeShader.dispatch(Math.ceil(PARTICLE_NUMS / 64));
   mesh.setVerticesBuffer(positionBuffer, false);
+  mesh.setVerticesBuffer(noiseBuffer, false);
 });
