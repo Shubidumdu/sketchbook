@@ -33,7 +33,7 @@ const camera = new ArcRotateCamera(
 );
 camera.attachControl(canvas, true);
 
-const PARTICLE_NUMS = 20_000;
+const PARTICLE_NUMS = 500_000;
 const RADIUS = 80;
 
 const mesh = MeshBuilder.CreatePolyhedron('oct', { type: 3, size: 1 }, scene);
@@ -60,7 +60,7 @@ const particleMeshMaterial = new ShaderMaterial(
 );
 
 mesh.material = particleMeshMaterial;
-mesh.material.wireframe = true;
+// mesh.material.wireframe = true;
 
 const initialVertexPositions = mesh.getVerticesData(VertexBuffer.PositionKind)!;
 

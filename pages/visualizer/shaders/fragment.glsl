@@ -10,5 +10,5 @@ uniform mat4 worldViewProjection;
 out vec4 outColor;
 
 void main() {
-  outColor = vec4(1.);
+  outColor = vec4(vNormal, 1.);
 }

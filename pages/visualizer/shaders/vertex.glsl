@@ -15,8 +15,8 @@ out vec3 vPosition;
 out vec3 vNormal;
 
 void main() {
-  vec3 position = (p_position + (noise * .5) * v_position);
-  vPosition = mat3(world)*position;
+  vec3 position = (p_position + (noise * .4) * v_position);
+  vPosition = mat3(world)*p_position;
   vNormal = mat3(world)*normal;
 
   gl_Position = worldViewProjection * vec4(position, 1.);

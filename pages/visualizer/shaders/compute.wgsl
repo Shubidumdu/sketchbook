@@ -25,14 +25,15 @@ const core = vec3(0., 0., 0.);
     return;
   }
 
-  let speed = uniforms.deltaTime * 0.005;
+  let speed = uniforms.deltaTime * 0.0001;
+  let rotateYMatrix = mat3x3(vec3(cos(speed), 0, -sin(speed)), vec3(0., 1., 0.), vec3(sin(speed), 0, cos(speed)));
   let radius = uniforms.radius;
   let position = particles[index].position;
-  let noise = perlinNoise3(position.xyz);
-  let velocity = (normalize(position - core) * radius - vec3(cos(speed), 0., -sin(speed))) - position;
+  let noise = max(perlinNoise3(position.xyz * .1), .1);
+  let velocity = rotateYMatrix * (normalize(position - core) * radius) - position;
 
   particles[index].noise = noise;
-  particles[index].position += velocity * speed;
+  particles[index].position += velocity;
 }
 
 fn permute4(x: vec4f) -> vec4f { return ((x * 34. + 1.) * x) % vec4f(289.); }
