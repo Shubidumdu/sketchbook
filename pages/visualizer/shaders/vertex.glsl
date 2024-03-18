@@ -25,6 +25,5 @@ void main() {
   vOuter = mat3(world)*outer;
   float nMid = mid / 255.;
   float nLow = low / 255.;
-
-  gl_Position = worldViewProjection * vec4(((.8 + .2 * nLow ) * position + (nMid * 20.) * noise * outer), 1.);
+  gl_Position = worldViewProjection * vec4(((.8 + .2 * nLow ) * position + (nMid * 30.) * noise * outer), 1.);
 }

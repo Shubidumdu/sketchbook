@@ -56,7 +56,7 @@ const camera = new ArcRotateCamera(
 );
 camera.attachControl(canvas, true);
 
-const PARTICLE_NUMS = 500_000;
+const PARTICLE_NUMS = 100_000;
 const RADIUS = 80;
 
 const mesh = MeshBuilder.CreatePolyhedron('oct', { type: 3, size: 1 }, scene);
@@ -133,11 +133,13 @@ uniforms.addUniform('deltaTime', 1);
 uniforms.addUniform('radius', 1);
 uniforms.addUniform('particleCount', 1);
 uniforms.addUniform('time', 1);
+uniforms.addUniform('high', 1);
 
 uniforms.updateFloat('deltaTime', 0.001);
 uniforms.updateFloat('radius', RADIUS);
 uniforms.updateInt('particleCount', PARTICLE_NUMS);
 uniforms.updateFloat('time', 0);
+uniforms.updateFloat('high', 0);
 uniforms.update();
 
 const particleBuffer = new StorageBuffer(
@@ -200,12 +202,11 @@ let time = 0;
 
 scene.onBeforeRenderObservable.add(() => {
   analyser.getByteFrequencyData(dataArray);
-
-  console.log(dataArray);
   const deltaTime = scene.deltaTime;
   time += deltaTime;
   uniforms.updateFloat('deltaTime', deltaTime);
   uniforms.updateFloat('time', time);
+  uniforms.updateFloat('high', dataArray[12]);
   uniforms.update();
   camera.alpha += deltaTime * 0.00025;
   computeShader.dispatch(Math.ceil(PARTICLE_NUMS / 64));
