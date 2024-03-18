@@ -10,6 +10,8 @@ in float noise;
 uniform mat4 world;
 uniform mat4 worldViewProjection;
 uniform float time;
+uniform float mid;
+uniform float low;
 
 out vec3 vPosition;
 out vec3 vNormal;
@@ -21,6 +23,8 @@ void main() {
   vPosition = mat3(world)*p_position;
   vNormal = mat3(world)*normal;
   vOuter = mat3(world)*outer;
+  float nMid = mid / 255.;
+  float nLow = low / 255.;
 
-  gl_Position = worldViewProjection * vec4((position), 1.);
+  gl_Position = worldViewProjection * vec4(((.8 + .2 * nLow ) * position + (nMid * 20.) * noise * outer), 1.);
 }

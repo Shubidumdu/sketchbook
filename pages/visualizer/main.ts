@@ -17,7 +17,30 @@ import computeShaderSource from './shaders/compute.wgsl?raw';
 import particleFragmentShaderSource from './shaders/fragment.glsl?raw';
 import particleVertexShaderSource from './shaders/vertex.glsl?raw';
 
+const audioInput = document.getElementById('audioFile') as HTMLInputElement;
+const audio = document.getElementById('audio') as HTMLAudioElement;
+
+audioInput.addEventListener('change', (event) => {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
+  if (!file) return;
+  const objectURL = URL.createObjectURL(file);
+  console.log(objectURL);
+  audio.src = objectURL;
+  audio.load();
+});
+
+const audioContext = new window.AudioContext();
+const analyser = audioContext.createAnalyser();
+const source = audioContext.createMediaElementSource(audio);
+source.connect(analyser);
+analyser.connect(audioContext.destination);
+analyser.fftSize = Math.pow(2, 5);
+const bufferLength = analyser.frequencyBinCount;
+const dataArray = new Uint8Array(bufferLength);
+
 const canvas = document.getElementById('babylon') as HTMLCanvasElement;
+
 const engine = new WebGPUEngine(canvas);
 await engine.initAsync();
 const scene = new Scene(engine);
@@ -55,12 +78,11 @@ const particleMeshMaterial = new ShaderMaterial(
       'normal',
       'noise',
     ],
-    uniforms: ['time', 'world', 'worldViewProjection'],
+    uniforms: ['time', 'world', 'worldViewProjection', 'mid', 'low'],
   },
 );
 
 mesh.material = particleMeshMaterial;
-// mesh.material.wireframe = true;
 
 const initialVertexPositions = mesh.getVerticesData(VertexBuffer.PositionKind)!;
 
@@ -177,6 +199,9 @@ engine.runRenderLoop(() => {
 let time = 0;
 
 scene.onBeforeRenderObservable.add(() => {
+  analyser.getByteFrequencyData(dataArray);
+
+  console.log(dataArray);
   const deltaTime = scene.deltaTime;
   time += deltaTime;
   uniforms.updateFloat('deltaTime', deltaTime);
@@ -184,6 +209,8 @@ scene.onBeforeRenderObservable.add(() => {
   uniforms.update();
   camera.alpha += deltaTime * 0.00025;
   computeShader.dispatch(Math.ceil(PARTICLE_NUMS / 64));
+  particleMeshMaterial.setFloat('low', dataArray[4]);
+  particleMeshMaterial.setFloat('mid', dataArray[8]);
   mesh.setVerticesBuffer(positionBuffer, false);
   mesh.setVerticesBuffer(noiseBuffer, false);
 });
