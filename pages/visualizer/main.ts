@@ -110,10 +110,12 @@ const uniforms = new UniformBuffer(engine, undefined, undefined, 'uniforms');
 uniforms.addUniform('deltaTime', 1);
 uniforms.addUniform('radius', 1);
 uniforms.addUniform('particleCount', 1);
+uniforms.addUniform('time', 1);
 
 uniforms.updateFloat('deltaTime', 0.001);
 uniforms.updateFloat('radius', RADIUS);
 uniforms.updateInt('particleCount', PARTICLE_NUMS);
+uniforms.updateFloat('time', 0);
 uniforms.update();
 
 const particleBuffer = new StorageBuffer(
@@ -172,8 +174,13 @@ engine.runRenderLoop(() => {
   engine.resize();
 });
 
+let time = 0;
+
 scene.onBeforeRenderObservable.add(() => {
-  uniforms.updateFloat('deltaTime', scene.deltaTime);
+  const deltaTime = scene.deltaTime;
+  time += deltaTime;
+  uniforms.updateFloat('deltaTime', deltaTime);
+  uniforms.updateFloat('time', time);
   uniforms.update();
   computeShader.dispatch(Math.ceil(PARTICLE_NUMS / 64));
   mesh.setVerticesBuffer(positionBuffer, false);

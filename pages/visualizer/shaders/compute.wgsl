@@ -2,6 +2,7 @@ struct Uniforms {
   deltaTime: f32,
   radius: f32,
   particleCount: u32,
+  time: f32,
 }
 
 struct Particle {
@@ -25,11 +26,12 @@ const core = vec3(0., 0., 0.);
     return;
   }
 
+  let time = uniforms.time * 0.0001;
   let speed = uniforms.deltaTime * 0.0001;
   let rotateYMatrix = mat3x3(vec3(cos(speed), 0, -sin(speed)), vec3(0., 1., 0.), vec3(sin(speed), 0, cos(speed)));
   let radius = uniforms.radius;
   let position = particles[index].position;
-  let noise = max(perlinNoise3(position.xyz * .1), .1);
+  let noise = max(perlinNoise3((position.xyz) * .1), .1);
   let velocity = rotateYMatrix * (normalize(position - core) * radius) - position;
 
   particles[index].noise = noise;
