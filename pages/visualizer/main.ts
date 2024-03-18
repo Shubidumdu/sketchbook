@@ -21,7 +21,7 @@ const canvas = document.getElementById('babylon') as HTMLCanvasElement;
 const engine = new WebGPUEngine(canvas);
 await engine.initAsync();
 const scene = new Scene(engine);
-scene.clearColor = Color4.FromHexString('#212E33');
+scene.clearColor = Color4.FromHexString('#ffffff');
 
 const camera = new ArcRotateCamera(
   'camera',
