@@ -16,7 +16,7 @@ out vec3 vNormal;
 out vec3 vOuter;
 
 void main() {
-  vec3 position = (p_position + (noise * .4) * v_position);
+  vec3 position = (p_position + (noise * .6) * v_position);
   vec3 outer = normalize(p_position - vec3(0.));
   vPosition = mat3(world)*p_position;
   vNormal = mat3(world)*normal;

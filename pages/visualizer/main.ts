@@ -182,7 +182,7 @@ scene.onBeforeRenderObservable.add(() => {
   uniforms.updateFloat('deltaTime', deltaTime);
   uniforms.updateFloat('time', time);
   uniforms.update();
-  camera.alpha += deltaTime * 0.0005;
+  camera.alpha += deltaTime * 0.00025;
   computeShader.dispatch(Math.ceil(PARTICLE_NUMS / 64));
   mesh.setVerticesBuffer(positionBuffer, false);
   mesh.setVerticesBuffer(noiseBuffer, false);

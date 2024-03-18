@@ -26,12 +26,12 @@ const core = vec3(0., 0., 0.);
     return;
   }
 
-  let time = uniforms.time * 0.0001;
+  let time = uniforms.time * 0.02;
   let speed = uniforms.deltaTime * 0.0001;
   let rotateYMatrix = mat3x3(vec3(cos(speed), 0, -sin(speed)), vec3(0., 1., 0.), vec3(sin(speed), 0, cos(speed)));
   let radius = uniforms.radius;
   let position = particles[index].position;
-  let noise = max(perlinNoise3((position.xyz) * .1), .1);
+  let noise = max(fbm3d((position.xyz + vec3(0, time, 0)) * .2), .1);
   let velocity = rotateYMatrix * (normalize(position - core) * radius) - position;
 
   particles[index].noise = noise;
@@ -111,4 +111,16 @@ fn perlinNoise3(P: vec3f) -> f32 {
     let n_yz = mix(n_z.xy, n_z.zw, vec2f(f32(fade_xyz.y))); // simplify after chrome bug fix
     let n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x);
     return 2.2 * n_xyz;
+}
+
+const m3: mat3x3f = mat3x3f(vec3f(0.8, 0.6, 0.4), vec3f(-0.6, 0.8, 0.4), vec3f(0.1, 0.2, 0.3));
+
+fn fbm3d(_p: vec3f) -> f32 {
+  var f: f32 = 0.;
+  var p: vec3f = _p;
+  f = f + 0.5000 * perlinNoise3(p); p = m3 * p * 2.02;
+  f = f + 0.2500 * perlinNoise3(p); p = m3 * p * 2.03;
+  f = f + 0.1250 * perlinNoise3(p); p = m3 * p * 2.01;
+  f = f + 0.0625 * perlinNoise3(p);
+  return f / 0.9375;
 }
