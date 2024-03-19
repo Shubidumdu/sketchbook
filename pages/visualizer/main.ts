@@ -18,10 +18,12 @@ import particleFragmentShaderSource from './shaders/fragment.glsl?raw';
 import particleVertexShaderSource from './shaders/vertex.glsl?raw';
 import backInBlackSrc from './audios/backInBlack.mp3';
 import somethingAboutUsSrc from './audios/somethingAboutUs.mp3';
+import funkyTownSrc from './audios/funkyTown.mp3';
 
 const audioTracks = {
   backInBlack: backInBlackSrc,
   somethingAboutUs: somethingAboutUsSrc,
+  funkyTown: funkyTownSrc,
 };
 
 const audio = document.getElementById('audio') as HTMLAudioElement;
@@ -197,11 +199,6 @@ const computeShader = new ComputeShader(
 computeShader.setUniformBuffer('uniforms', uniforms);
 computeShader.setStorageBuffer('particles', particleBuffer);
 
-engine.runRenderLoop(() => {
-  scene.render();
-  engine.resize();
-});
-
 let time = 0;
 
 scene.clearColor = Color4.FromHexString('#000000');
@@ -227,4 +224,9 @@ scene.onBeforeRenderObservable.add(() => {
     dataArray[4] / 4,
     255,
   );
+});
+
+engine.runRenderLoop(() => {
+  scene.render();
+  engine.resize();
 });
