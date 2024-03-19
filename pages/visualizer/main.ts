@@ -16,18 +16,23 @@ import {
 import computeShaderSource from './shaders/compute.wgsl?raw';
 import particleFragmentShaderSource from './shaders/fragment.glsl?raw';
 import particleVertexShaderSource from './shaders/vertex.glsl?raw';
+import backInBlackSrc from './audios/backInBlack.mp3';
+import somethingAboutUsSrc from './audios/somethingAboutUs.mp3';
 
-const audioInput = document.getElementById('audioFile') as HTMLInputElement;
+const audioTracks = {
+  backInBlack: backInBlackSrc,
+  somethingAboutUs: somethingAboutUsSrc,
+};
+
 const audio = document.getElementById('audio') as HTMLAudioElement;
+const select = document.getElementById('musicSelect') as HTMLSelectElement;
 
-audioInput.addEventListener('change', (event) => {
-  const target = event.target as HTMLInputElement;
-  const file = target.files?.[0];
-  if (!file) return;
-  const objectURL = URL.createObjectURL(file);
-  console.log(objectURL);
-  audio.src = objectURL;
-  audio.load();
+audio.src = audioTracks['backInBlack'];
+
+select.addEventListener('change', (e) => {
+  const target = e.target as HTMLSelectElement;
+  const targetKey = target.selectedOptions[0].value as keyof typeof audioTracks;
+  audio.src = audioTracks[targetKey];
 });
 
 const audioContext = new window.AudioContext();
@@ -44,7 +49,6 @@ const canvas = document.getElementById('babylon') as HTMLCanvasElement;
 const engine = new WebGPUEngine(canvas);
 await engine.initAsync();
 const scene = new Scene(engine);
-scene.clearColor = Color4.FromHexString('#ffffff');
 
 const camera = new ArcRotateCamera(
   'camera',
@@ -56,7 +60,7 @@ const camera = new ArcRotateCamera(
 );
 camera.attachControl(canvas, true);
 
-const PARTICLE_NUMS = 100_000;
+const PARTICLE_NUMS = 500_000;
 const RADIUS = 80;
 
 const mesh = MeshBuilder.CreatePolyhedron('oct', { type: 3, size: 1 }, scene);
@@ -78,7 +82,7 @@ const particleMeshMaterial = new ShaderMaterial(
       'normal',
       'noise',
     ],
-    uniforms: ['time', 'world', 'worldViewProjection', 'mid', 'low'],
+    uniforms: ['time', 'world', 'worldViewProjection', 'mid', 'low', 'high'],
   },
 );
 
@@ -200,6 +204,8 @@ engine.runRenderLoop(() => {
 
 let time = 0;
 
+scene.clearColor = Color4.FromHexString('#000000');
+
 scene.onBeforeRenderObservable.add(() => {
   analyser.getByteFrequencyData(dataArray);
   const deltaTime = scene.deltaTime;
@@ -212,6 +218,13 @@ scene.onBeforeRenderObservable.add(() => {
   computeShader.dispatch(Math.ceil(PARTICLE_NUMS / 64));
   particleMeshMaterial.setFloat('low', dataArray[4]);
   particleMeshMaterial.setFloat('mid', dataArray[8]);
+  particleMeshMaterial.setFloat('high', dataArray[12]);
   mesh.setVerticesBuffer(positionBuffer, false);
   mesh.setVerticesBuffer(noiseBuffer, false);
+  scene.clearColor = Color4.FromInts(
+    dataArray[12] / 4,
+    dataArray[8] / 4,
+    dataArray[4] / 4,
+    255,
+  );
 });
