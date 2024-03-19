@@ -1,0 +1,32 @@
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+img {
+  z-index: 999;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 80px;
+}
+
+input {
+  position: absolute;
+  right: 0;
+}
+
+audio {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+}
+
+select {
+  position: absolute;
+  left: 16px;
+  top: 80px;
+}
