@@ -50,7 +50,9 @@ const init = async () => {
 
   const canvas = document.getElementById('babylon') as HTMLCanvasElement;
 
-  const engine = new WebGPUEngine(canvas);
+  const engine = new WebGPUEngine(canvas, {
+    antialias: true,
+  });
   await engine.initAsync();
   const scene = new Scene(engine);
 
