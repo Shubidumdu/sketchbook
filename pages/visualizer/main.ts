@@ -60,7 +60,7 @@ const init = async () => {
 
   const camera = new ArcRotateCamera(
     'camera',
-    -Math.PI / 2,
+    Math.PI / 2,
     Math.PI / 2,
     280,
     Vector3.Zero(),
