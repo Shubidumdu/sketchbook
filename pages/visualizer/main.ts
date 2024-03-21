@@ -245,5 +245,4 @@ const startButton = document.querySelector('.start > button');
 startButton?.addEventListener('click', () => {
   init();
   startButton.parentElement?.remove();
-  audio.star;
 });
