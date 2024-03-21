@@ -27,5 +27,5 @@ void main() {
   float nMid = mid / 255.;
   float nLow = low / 255.;
   float nHigh = high / 255.;
-  gl_Position = worldViewProjection * vec4(((.8 + .2 * nLow ) * position + (nMid * 20. + nHigh * 20.) * noise * outer), 1.);
+  gl_Position = worldViewProjection * vec4(((.8 + .2 * nLow ) * position + (2. + nMid * 20. + nHigh * 20.) * noise * outer), 1.);
 }
