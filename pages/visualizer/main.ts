@@ -28,7 +28,9 @@ const init = async () => {
   };
 
   const audio = document.getElementById('audio') as HTMLAudioElement;
+  audio.style.display = 'block';
   const select = document.getElementById('musicSelect') as HTMLSelectElement;
+  select.style.display = 'block';
 
   audio.src = audioTracks['backInBlack'];
 
@@ -238,4 +240,10 @@ const init = async () => {
   });
 };
 
-init();
+const startButton = document.querySelector('.start > button');
+
+startButton?.addEventListener('click', () => {
+  init();
+  startButton.parentElement?.remove();
+  audio.star;
+});
