@@ -68,10 +68,11 @@ const init = async () => {
   );
   camera.attachControl(canvas, true);
 
-  const PARTICLE_NUMS = 200_000;
+  const PARTICLE_NUMS = 100_000;
   const RADIUS = 80;
 
   const mesh = MeshBuilder.CreatePolyhedron('oct', { type: 3, size: 1 }, scene);
+
   mesh.forcedInstanceCount = PARTICLE_NUMS;
 
   const particleMeshMaterial = new ShaderMaterial(

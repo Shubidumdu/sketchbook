@@ -19,13 +19,11 @@ out vec3 vNormal;
 out vec3 vOuter;
 
 void main() {
-  vec3 position = (p_position + (noise * .6) * v_position);
-  vec3 outer = normalize(p_position - vec3(0.));
-  vPosition = mat3(world)*p_position;
   vNormal = mat3(world)*normal;
-  vOuter = mat3(world)*outer;
+  vec3 position = (p_position + (noise * .3) * v_position);
+  vec3 outer = normalize(p_position - vec3(0.));
   float nMid = mid / 255.;
   float nLow = low / 255.;
   float nHigh = high / 255.;
-  gl_Position = worldViewProjection * vec4(((.8 + .2 * nLow ) * position + (2. + nMid * 20. + nHigh * 20.) * noise * outer), 1.);
+  gl_Position = worldViewProjection * vec4(((.8 + .2 * nLow ) * position + (4. + nMid * 20. + nHigh * 20.) * noise * outer), 1.);
 }
