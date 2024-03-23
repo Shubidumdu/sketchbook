@@ -4,6 +4,8 @@ struct Uniforms {
   particleCount: u32,
   time: f32,
   high: f32,
+  mid: f32,
+  low: f32,
 }
 
 struct Particle {
@@ -29,11 +31,13 @@ const core = vec3(0., 0., 0.);
 
   let time = uniforms.time * 0.02;
   let high = uniforms.high / 255.;
+  let mid = uniforms.mid / 255.;
+  let low = uniforms.low / 255.;
   let speed = uniforms.deltaTime * 0.002;
   let rotateYMatrix = mat3x3(vec3(cos(speed), 0, -sin(speed)), vec3(0., 1., 0.), vec3(sin(speed), 0, cos(speed)));
   let radius = uniforms.radius;
   let position = particles[index].position;
-  let noise = fbm3d((position.xyz * (.4 + .2 * high) + vec3(0, time, 0)) * .3);
+  let noise = fbm3d((vec3(1. + .2 * low, 1. + .2 * mid, 1. + .2 * high) * position.xyz * .4 + vec3(0, time, 0)) * .3);
   let nPosition = normalize(position - core);
   let velocity = (rotateYMatrix * (nPosition * radius) - position) * .05;
 

@@ -149,12 +149,16 @@ const init = async () => {
   uniforms.addUniform('particleCount', 1);
   uniforms.addUniform('time', 1);
   uniforms.addUniform('high', 1);
+  uniforms.addUniform('mid', 1);
+  uniforms.addUniform('low', 1);
 
   uniforms.updateFloat('deltaTime', 0.001);
   uniforms.updateFloat('radius', RADIUS);
   uniforms.updateInt('particleCount', PARTICLE_NUMS);
   uniforms.updateFloat('time', 0);
   uniforms.updateFloat('high', 0);
+  uniforms.updateFloat('mid', 0);
+  uniforms.updateFloat('low', 0);
   uniforms.update();
 
   const particleBuffer = new StorageBuffer(
@@ -219,6 +223,8 @@ const init = async () => {
     uniforms.updateFloat('deltaTime', deltaTime);
     uniforms.updateFloat('time', time);
     uniforms.updateFloat('high', dataArray[12]);
+    uniforms.updateFloat('mid', dataArray[8]);
+    uniforms.updateFloat('low', dataArray[4]);
     uniforms.update();
     camera.alpha += deltaTime * 0.00025;
     computeShader.dispatch(Math.ceil(PARTICLE_NUMS / 64));
