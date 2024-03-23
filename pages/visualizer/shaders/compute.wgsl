@@ -29,12 +29,12 @@ const core = vec3(0., 0., 0.);
 
   let time = uniforms.time * 0.02;
   let high = uniforms.high / 255.;
-  let speed = uniforms.deltaTime * 0.0001;
+  let speed = uniforms.deltaTime * 0.002;
   let rotateYMatrix = mat3x3(vec3(cos(speed), 0, -sin(speed)), vec3(0., 1., 0.), vec3(sin(speed), 0, cos(speed)));
   let radius = uniforms.radius;
   let position = particles[index].position;
   let noise = max(fbm3d((position.xyz * (.4 + .1 * high) + vec3(0, time, 0)) * .2), .1);
-  let velocity = rotateYMatrix * (normalize(position - core) * radius) - position;
+  let velocity = (rotateYMatrix * (normalize(position - core) * radius) - position) * .05;
 
   particles[index].noise = noise;
   particles[index].position += velocity;
