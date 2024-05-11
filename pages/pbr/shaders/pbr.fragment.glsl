@@ -1,7 +1,7 @@
 #version 300 es
 precision highp float;
 
-uniform vec3 lightPositions[1];
+uniform vec3 lightPositions[3];
 uniform mat4 world;
 uniform vec3 cameraPosition;
 
@@ -54,8 +54,8 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0) {
 }  
 
 void main(void){
-  float metallic = 0.;
-  float roughness = 1.;
+  float metallic = .5;
+  float roughness = .5;
   vec3 albedo = vColor;
   vec3 N=vNormal;
   vec3 V=normalize(cameraPosition - vPosition);
@@ -65,7 +65,7 @@ void main(void){
   // reflectance equation
   vec3 Lo = vec3(0.0);
 
-  for (int i = 0; i < 3; ++i) {
+  for (int i = 0; i < 3; i++) {
     vec3 lightPosition = lightPositions[i];
     vec3 L = normalize(lightPosition - vPosition);
     vec3 H = normalize(V + L);

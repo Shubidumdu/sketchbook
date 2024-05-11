@@ -15,7 +15,7 @@ out vec3 vColor;
 void main(){
   vec4 p=vec4(position,1.);
   gl_Position=worldViewProjection*p;
-  vNormal=normal;
-  vColor=color;
+  vNormal=mat3(world)*normal;
   vPosition=vec3(world*p);
+  vColor=color;
 }

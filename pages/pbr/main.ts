@@ -29,9 +29,9 @@ Effect.ShadersStore['pbrFragmentShader'] = pbrFragmentShader;
 engine.displayLoadingUI();
 
 const lights = [
-  new PointLight('light', new Vector3(-1, 5, 0)),
-  new PointLight('light', new Vector3(0, 0, 2)),
-  new PointLight('light', new Vector3(0, 3, -2)),
+  new PointLight('light', new Vector3(4, 5, -1)),
+  new PointLight('light', new Vector3(5, 12, -1)),
+  new PointLight('light', new Vector3(-4, -6, 4)),
 ];
 
 const init = async () => {
