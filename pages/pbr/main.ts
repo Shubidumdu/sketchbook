@@ -3,6 +3,7 @@ import {
   ArcRotateCamera,
   Effect,
   Engine,
+  Light,
   PBRMaterial,
   PointLight,
   Scene,
@@ -27,8 +28,13 @@ Effect.ShadersStore['pbrFragmentShader'] = pbrFragmentShader;
 
 engine.displayLoadingUI();
 
+const lights = [
+  new PointLight('light', new Vector3(-1, 5, 0)),
+  new PointLight('light', new Vector3(0, 0, 2)),
+  new PointLight('light', new Vector3(0, 3, -2)),
+];
+
 const init = async () => {
-  const light = new PointLight('light', new Vector3(50, 100, 0));
   const camera = new ArcRotateCamera(
     'camera',
     Math.PI / 2,
@@ -43,12 +49,6 @@ const init = async () => {
   camera.attachControl(canvas, true);
   const [root, ...restMeshes] = await importMeshes(modelPath);
   const customMaterial = makeShaderMaterial();
-  customMaterial.setVector3(
-    'reverseLightDirection',
-    light.position.normalizeToNew(),
-  );
-  customMaterial.setVector3('mainColor', new Vector3(255, 255, 255));
-  customMaterial.setVector3('subColor', new Vector3(0, 0, 0.24));
 
   restMeshes.forEach((mesh) => {
     mesh.material = customMaterial;
@@ -59,6 +59,13 @@ const init = async () => {
   engine.hideLoadingUI();
 
   engine.runRenderLoop(() => {
+    customMaterial.setArray3(
+      'lightPositions',
+      lights
+        .map((light) => [light.position.x, light.position.y, light.position.z])
+        .flat(),
+    );
+    customMaterial.setVector3('cameraPosition', camera.position);
     resizeCanvasToDisplaySize(canvas);
     scene.render();
   });
@@ -66,8 +73,8 @@ const init = async () => {
 
 const makeShaderMaterial = () => {
   const material = new ShaderMaterial('customPbrShader', scene, 'pbr', {
-    attributes: ['position', 'normal', 'uv', 'color'],
-    uniforms: ['world', 'view', 'worldViewProjection'],
+    attributes: ['position', 'normal', 'color'],
+    uniforms: ['world', 'view', 'worldView', 'worldViewProjection'],
   });
 
   return material;
@@ -75,4 +82,4 @@ const makeShaderMaterial = () => {
 
 init();
 
-// Inspector.Show(scene, {});
+Inspector.Show(scene, {});
