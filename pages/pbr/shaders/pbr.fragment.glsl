@@ -11,7 +11,7 @@ in vec3 vColor;
 
 out vec4 fragColor;
 
-vec3 lightColor = vec3(23.47, 21.31, 20.79);
+vec3 lightColor = vec3(25.47, 21.31, 20.79) * 4.;
 
 const float PI = 3.14159265359;
 
@@ -54,7 +54,7 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0) {
 }  
 
 void main(void){
-  float metallic = .5;
+  float metallic = .9;
   float roughness = .5;
   vec3 albedo = vColor;
   vec3 N=vNormal;
