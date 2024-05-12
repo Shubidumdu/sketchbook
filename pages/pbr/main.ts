@@ -7,6 +7,7 @@ import {
   Effect,
   Engine,
   PointLight,
+  RenderTargetTexture,
   Scene,
   ShaderMaterial,
   Vector3,
@@ -18,6 +19,7 @@ import environmentPath from './environment.env';
 import { resizeCanvasToDisplaySize } from '../../utils/webgl';
 import pbrVertexShader from './shaders/pbr.vertex.glsl?raw';
 import pbrFragmentShader from './shaders/pbr.fragment.glsl?raw';
+import { Inspector } from '@babylonjs/inspector';
 
 const metallicInput = document.getElementById('metallic') as HTMLInputElement;
 const roughnessInput = document.getElementById('roughness') as HTMLInputElement;
@@ -25,15 +27,12 @@ const roughnessInput = document.getElementById('roughness') as HTMLInputElement;
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 const engine = new Engine(canvas, true);
 const scene = new Scene(engine);
-// const envTexture = new CubeTexture(environmentPath, scene);
+const envTexture = CubeTexture.CreateFromPrefilteredData(
+  environmentPath,
+  scene,
+);
 
-const environment = scene.createDefaultEnvironment({
-  skyboxTexture: environmentPath,
-  skyboxSize: 1000,
-  skyboxColor: new Color3(1, 1, 1),
-  environmentTexture: environmentPath,
-  toneMappingEnabled: false,
-});
+scene.createDefaultSkybox(envTexture);
 
 Effect.ShadersStore['pbrVertexShader'] = pbrVertexShader;
 Effect.ShadersStore['pbrFragmentShader'] = pbrFragmentShader;
@@ -51,7 +50,7 @@ const lightColors = [
   [0.6, 0.1, 0.1],
   [0.1, 0.6, 0.1],
   [0.2, 0.2, 0.8],
-  [1, 1, 1],
+  [0, 1, 1],
 ]
   .flat()
   .map((n) => n * 255);
@@ -72,6 +71,35 @@ const init = async () => {
   const [root, ...restMeshes] = await importMeshes(modelPath);
   const customMaterial = makeShaderMaterial();
 
+  customMaterial.setArray3(
+    'sphericalHarmonics',
+    [
+      envTexture.sphericalPolynomial?.preScaledHarmonics?.l00,
+      envTexture.sphericalPolynomial?.preScaledHarmonics?.l1_1,
+      envTexture.sphericalPolynomial?.preScaledHarmonics?.l10,
+      envTexture.sphericalPolynomial?.preScaledHarmonics?.l11,
+      envTexture.sphericalPolynomial?.preScaledHarmonics?.l2_2,
+      envTexture.sphericalPolynomial?.preScaledHarmonics?.l2_1,
+      envTexture.sphericalPolynomial?.preScaledHarmonics?.l20,
+      envTexture.sphericalPolynomial?.preScaledHarmonics?.l21,
+      envTexture.sphericalPolynomial?.preScaledHarmonics?.l22,
+    ].flatMap(({ x, y, z }: any) => [x, y, z]),
+  );
+
+  console.log(
+    [
+      envTexture.sphericalPolynomial?.preScaledHarmonics?.l00,
+      envTexture.sphericalPolynomial?.preScaledHarmonics?.l1_1,
+      envTexture.sphericalPolynomial?.preScaledHarmonics?.l10,
+      envTexture.sphericalPolynomial?.preScaledHarmonics?.l11,
+      envTexture.sphericalPolynomial?.preScaledHarmonics?.l2_2,
+      envTexture.sphericalPolynomial?.preScaledHarmonics?.l2_1,
+      envTexture.sphericalPolynomial?.preScaledHarmonics?.l20,
+      envTexture.sphericalPolynomial?.preScaledHarmonics?.l21,
+      envTexture.sphericalPolynomial?.preScaledHarmonics?.l22,
+    ].flatMap(({ x, y, z }: any) => [x, y, z]),
+  );
+
   restMeshes.forEach((mesh) => {
     mesh.material = customMaterial;
     mesh.setParent(null);
@@ -91,6 +119,7 @@ const init = async () => {
     customMaterial.setVector3('cameraPosition', camera.position);
     customMaterial.setFloat('metallic', Number(metallicInput.value));
     customMaterial.setFloat('roughness', Number(roughnessInput.value));
+    customMaterial.setTexture('environmentMap', envTexture);
     resizeCanvasToDisplaySize(canvas);
     scene.render();
   });
@@ -107,4 +136,4 @@ const makeShaderMaterial = () => {
 
 init();
 
-// Inspector.Show(scene, {});
+Inspector.Show(scene, {});

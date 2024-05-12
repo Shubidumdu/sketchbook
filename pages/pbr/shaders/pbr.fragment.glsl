@@ -7,6 +7,7 @@ uniform mat4 world;
 uniform vec3 cameraPosition;
 uniform float metallic;
 uniform float roughness;
+uniform vec3 sphericalHarmonics[9];
 
 in vec3 vPosition;
 in vec3 vNormal;
@@ -52,13 +53,31 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
     return ggx1 * ggx2;
 }
 
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
+  return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
 vec3 fresnelSchlick(float cosTheta, vec3 F0) {
   return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
-}  
+}
+
+vec3 irradianceSH(vec3 n) {
+  return
+      sphericalHarmonics[0]
+    + sphericalHarmonics[1] * (n.y)
+    + sphericalHarmonics[2] * (n.z)
+    + sphericalHarmonics[3] * (n.x)
+    + sphericalHarmonics[4] * (n.y * n.x)
+    + sphericalHarmonics[5] * (n.y * n.z)
+    + sphericalHarmonics[6] * (3.0 * n.z * n.z - 1.0)
+    + sphericalHarmonics[7] * (n.z * n.x)
+    + sphericalHarmonics[8] * (n.x * n.x - n.y * n.y);
+}
 
 void main(void){
   // float metallic = .9;
   // float roughness = .5;
+  // vec3 albedo = vColor;
   vec3 albedo = vColor;
   vec3 N=vNormal;
   vec3 V=normalize(cameraPosition - vPosition);
@@ -80,11 +99,13 @@ void main(void){
     // cook-torrance brdf
     float NDF = DistributionGGX(N, H, roughness);
     float G = GeometrySmith(N, V, L, roughness);      
-    vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);       
+    vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness); 
     
     vec3 kS = F;
     vec3 kD = vec3(1.0) - kS;
-    kD *= 1.0 - metallic;
+    vec3 irradiance = irradianceSH(N);
+    vec3 diffuse = irradiance * albedo;
+    vec3 ambient = (kD * diffuse);
     
     vec3 numerator    = NDF * G * F;
     float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
@@ -94,7 +115,7 @@ void main(void){
     Lo += (kD * albedo / PI + specular) * radiance * NdotL;    
   }
 
-  vec3 ambient = vec3(0.04) * albedo;
+  vec3 ambient = irradianceSH(N);
   vec3 color = ambient + Lo;
 
   color = color / (color + vec3(1.0));
