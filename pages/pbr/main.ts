@@ -1,10 +1,9 @@
 import './style.scss';
 import {
   ArcRotateCamera,
+  Color3,
   Effect,
   Engine,
-  Light,
-  PBRMaterial,
   PointLight,
   Scene,
   ShaderMaterial,
@@ -14,8 +13,6 @@ import '@babylonjs/loaders/glTF';
 import { importMeshes } from '../../utils/babylon';
 import modelPath from './tricanaOfCoimbra.glb';
 import { resizeCanvasToDisplaySize } from '../../utils/webgl';
-import { Inspector } from '@babylonjs/inspector';
-import { SimpleMaterial } from '@babylonjs/materials';
 import pbrVertexShader from './shaders/pbr.vertex.glsl?raw';
 import pbrFragmentShader from './shaders/pbr.fragment.glsl?raw';
 
@@ -33,6 +30,14 @@ const lights = [
   new PointLight('light', new Vector3(5, 12, -1)),
   new PointLight('light', new Vector3(-4, -6, 4)),
 ];
+
+const lightColors = [
+  [1, 0, 0],
+  [0, 1, 0],
+  [0, 0, 1],
+]
+  .flat()
+  .map((n) => n * 255);
 
 const init = async () => {
   const camera = new ArcRotateCamera(
@@ -65,6 +70,7 @@ const init = async () => {
         .map((light) => [light.position.x, light.position.y, light.position.z])
         .flat(),
     );
+    customMaterial.setArray3('lightColors', lightColors);
     customMaterial.setVector3('cameraPosition', camera.position);
     resizeCanvasToDisplaySize(canvas);
     scene.render();
@@ -82,4 +88,4 @@ const makeShaderMaterial = () => {
 
 init();
 
-Inspector.Show(scene, {});
+// Inspector.Show(scene, {});

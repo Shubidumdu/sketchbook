@@ -2,6 +2,7 @@
 precision highp float;
 
 uniform vec3 lightPositions[3];
+uniform vec3 lightColors[3];
 uniform mat4 world;
 uniform vec3 cameraPosition;
 
@@ -67,6 +68,7 @@ void main(void){
 
   for (int i = 0; i < 3; i++) {
     vec3 lightPosition = lightPositions[i];
+    vec3 lightColor = lightColors[i];
     vec3 L = normalize(lightPosition - vPosition);
     vec3 H = normalize(V + L);
     float distance = length(lightPosition - vPosition);
