@@ -43,14 +43,14 @@ const lights = [
   new PointLight('light', new Vector3(4, 5, -1)),
   new PointLight('light', new Vector3(5, 12, -1)),
   new PointLight('light', new Vector3(-4, -6, 4)),
-  new PointLight('light', new Vector3(0, 20, 0)),
+  new PointLight('light', new Vector3(2, 8, -10)),
 ];
 
 const lightColors = [
   [0.6, 0.1, 0.1],
   [0.1, 0.6, 0.1],
   [0.2, 0.2, 0.8],
-  [0, 1, 1],
+  [1, 1, 1],
 ]
   .flat()
   .map((n) => n * 255);
