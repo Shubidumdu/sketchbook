@@ -16,3 +16,20 @@ button {
   bottom: 1rem;
   left: 1rem;
 }
+
+.input-container {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  gap: 2px;
+  padding: 4px;
+  top: 0;
+  left: 0;
+
+  > label {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    color: white;
+  }
+}

@@ -16,6 +16,9 @@ import { resizeCanvasToDisplaySize } from '../../utils/webgl';
 import pbrVertexShader from './shaders/pbr.vertex.glsl?raw';
 import pbrFragmentShader from './shaders/pbr.fragment.glsl?raw';
 
+const metallicInput = document.getElementById('metallic') as HTMLInputElement;
+const roughnessInput = document.getElementById('roughness') as HTMLInputElement;
+
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 const engine = new Engine(canvas, true);
 const scene = new Scene(engine);
@@ -29,12 +32,14 @@ const lights = [
   new PointLight('light', new Vector3(4, 5, -1)),
   new PointLight('light', new Vector3(5, 12, -1)),
   new PointLight('light', new Vector3(-4, -6, 4)),
+  new PointLight('light', new Vector3(0, 20, 0)),
 ];
 
 const lightColors = [
-  [1, 0, 0],
-  [0, 1, 0],
-  [0, 0, 1],
+  [0.6, 0.1, 0.1],
+  [0.1, 0.6, 0.1],
+  [0.2, 0.2, 0.8],
+  [1, 1, 1],
 ]
   .flat()
   .map((n) => n * 255);
@@ -72,6 +77,8 @@ const init = async () => {
     );
     customMaterial.setArray3('lightColors', lightColors);
     customMaterial.setVector3('cameraPosition', camera.position);
+    customMaterial.setFloat('metallic', Number(metallicInput.value));
+    customMaterial.setFloat('roughness', Number(roughnessInput.value));
     resizeCanvasToDisplaySize(canvas);
     scene.render();
   });
