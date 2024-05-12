@@ -1,7 +1,9 @@
 import './style.scss';
 import {
   ArcRotateCamera,
+  BackgroundMaterial,
   Color3,
+  CubeTexture,
   Effect,
   Engine,
   PointLight,
@@ -12,6 +14,7 @@ import {
 import '@babylonjs/loaders/glTF';
 import { importMeshes } from '../../utils/babylon';
 import modelPath from './tricanaOfCoimbra.glb';
+import environmentPath from './environment.env';
 import { resizeCanvasToDisplaySize } from '../../utils/webgl';
 import pbrVertexShader from './shaders/pbr.vertex.glsl?raw';
 import pbrFragmentShader from './shaders/pbr.fragment.glsl?raw';
@@ -22,6 +25,15 @@ const roughnessInput = document.getElementById('roughness') as HTMLInputElement;
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 const engine = new Engine(canvas, true);
 const scene = new Scene(engine);
+// const envTexture = new CubeTexture(environmentPath, scene);
+
+const environment = scene.createDefaultEnvironment({
+  skyboxTexture: environmentPath,
+  skyboxSize: 1000,
+  skyboxColor: new Color3(1, 1, 1),
+  environmentTexture: environmentPath,
+  toneMappingEnabled: false,
+});
 
 Effect.ShadersStore['pbrVertexShader'] = pbrVertexShader;
 Effect.ShadersStore['pbrFragmentShader'] = pbrFragmentShader;
@@ -54,7 +66,7 @@ const init = async () => {
     scene,
   );
   camera.minZ = 0;
-  camera.maxZ = 240;
+  camera.maxZ = 1000;
   camera.target = Vector3.Zero();
   camera.attachControl(canvas, true);
   const [root, ...restMeshes] = await importMeshes(modelPath);
