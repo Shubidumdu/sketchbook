@@ -1,13 +1,10 @@
 import './style.scss';
 import {
   ArcRotateCamera,
-  BackgroundMaterial,
-  Color3,
   CubeTexture,
   Effect,
   Engine,
   PointLight,
-  RenderTargetTexture,
   Scene,
   ShaderMaterial,
   Vector3,
@@ -86,20 +83,6 @@ const init = async () => {
     ].flatMap(({ x, y, z }: any) => [x, y, z]),
   );
 
-  console.log(
-    [
-      envTexture.sphericalPolynomial?.preScaledHarmonics?.l00,
-      envTexture.sphericalPolynomial?.preScaledHarmonics?.l1_1,
-      envTexture.sphericalPolynomial?.preScaledHarmonics?.l10,
-      envTexture.sphericalPolynomial?.preScaledHarmonics?.l11,
-      envTexture.sphericalPolynomial?.preScaledHarmonics?.l2_2,
-      envTexture.sphericalPolynomial?.preScaledHarmonics?.l2_1,
-      envTexture.sphericalPolynomial?.preScaledHarmonics?.l20,
-      envTexture.sphericalPolynomial?.preScaledHarmonics?.l21,
-      envTexture.sphericalPolynomial?.preScaledHarmonics?.l22,
-    ].flatMap(({ x, y, z }: any) => [x, y, z]),
-  );
-
   restMeshes.forEach((mesh) => {
     mesh.material = customMaterial;
     mesh.setParent(null);
@@ -107,6 +90,9 @@ const init = async () => {
   root.dispose();
 
   engine.hideLoadingUI();
+
+  customMaterial.setTexture('brdfLUT', scene.environmentBRDFTexture);
+  customMaterial.setTexture('environmentMap', envTexture);
 
   engine.runRenderLoop(() => {
     customMaterial.setArray3(
@@ -119,7 +105,6 @@ const init = async () => {
     customMaterial.setVector3('cameraPosition', camera.position);
     customMaterial.setFloat('metallic', Number(metallicInput.value));
     customMaterial.setFloat('roughness', Number(roughnessInput.value));
-    customMaterial.setTexture('environmentMap', envTexture);
     resizeCanvasToDisplaySize(canvas);
     scene.render();
   });

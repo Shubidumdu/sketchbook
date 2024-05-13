@@ -9,6 +9,9 @@ uniform float metallic;
 uniform float roughness;
 uniform vec3 sphericalHarmonics[9];
 
+uniform samplerCube environmentMap;
+uniform sampler2D   brdfLUT;  
+
 in vec3 vPosition;
 in vec3 vNormal;
 in vec3 vColor;
@@ -18,7 +21,6 @@ out vec4 fragColor;
 vec3 lightColor = vec3(25.47, 21.31, 20.79) * 4.;
 
 const float PI = 3.14159265359;
-
 
 float DistributionGGX(vec3 N, vec3 H, float roughness) {
   float a      = roughness*roughness;
@@ -75,14 +77,14 @@ vec3 irradianceSH(vec3 n) {
 }
 
 void main(void){
-  // float metallic = .9;
-  // float roughness = .5;
-  // vec3 albedo = vColor;
   vec3 albedo = vColor;
   vec3 N=vNormal;
   vec3 V=normalize(cameraPosition - vPosition);
   vec3 F0=vec3(0.04);
   F0=mix(F0, albedo, metallic);
+
+  // ----
+  vec3 R = reflect(-V, N);
 
   // reflectance equation
   vec3 Lo = vec3(0.0);
@@ -99,17 +101,21 @@ void main(void){
     // cook-torrance brdf
     float NDF = DistributionGGX(N, H, roughness);
     float G = GeometrySmith(N, V, L, roughness);      
-    vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness); 
+    vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
     
     vec3 kS = F;
     vec3 kD = vec3(1.0) - kS;
+    kD *= 1.0 - metallic;
+
     vec3 irradiance = irradianceSH(N);
     vec3 diffuse = irradiance * albedo;
-    vec3 ambient = (kD * diffuse);
-    
-    vec3 numerator    = NDF * G * F;
-    float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
-    vec3 specular     = numerator / denominator;
+
+    const float MAX_REFLECTION_LOD = 4.0;
+    vec3 prefilteredColor = textureLod(environmentMap, R,  roughness * MAX_REFLECTION_LOD).rgb;   
+    vec2 envBRDF  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+    vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
+
+    vec3 ambient = (kD * diffuse + specular) * 1.; 
 
     float NdotL = max(dot(N, L), 0.0);                
     Lo += (kD * albedo / PI + specular) * radiance * NdotL;    
