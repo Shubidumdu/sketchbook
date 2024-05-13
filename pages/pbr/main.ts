@@ -12,11 +12,10 @@ import {
 import '@babylonjs/loaders/glTF';
 import { importMeshes } from '../../utils/babylon';
 import modelPath from './tricanaOfCoimbra.glb';
-import environmentPath from './environment.env';
+import environmentPath from './environment4.env';
 import { resizeCanvasToDisplaySize } from '../../utils/webgl';
 import pbrVertexShader from './shaders/pbr.vertex.glsl?raw';
 import pbrFragmentShader from './shaders/pbr.fragment.glsl?raw';
-import { Inspector } from '@babylonjs/inspector';
 
 const metallicInput = document.getElementById('metallic') as HTMLInputElement;
 const roughnessInput = document.getElementById('roughness') as HTMLInputElement;
@@ -46,11 +45,11 @@ const lights = [
 const lightColors = [
   [0.6, 0.1, 0.1],
   [0.1, 0.6, 0.1],
-  [0.2, 0.2, 0.8],
+  [1, 1, 1],
   [1, 1, 1],
 ]
   .flat()
-  .map((n) => n * 100);
+  .map((n) => n * 0);
 
 const init = async () => {
   const camera = new ArcRotateCamera(
@@ -120,5 +119,3 @@ const makeShaderMaterial = () => {
 };
 
 init();
-
-Inspector.Show(scene, {});
