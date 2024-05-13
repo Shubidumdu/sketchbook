@@ -50,7 +50,7 @@ const lightColors = [
   [1, 1, 1],
 ]
   .flat()
-  .map((n) => n * 255);
+  .map((n) => n * 100);
 
 const init = async () => {
   const camera = new ArcRotateCamera(
