@@ -88,41 +88,24 @@ void main(void){
 
   // reflectance equation
   vec3 Lo = vec3(0.0);
+ 
+  vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+  
+  vec3 kS = F;
+  vec3 kD = vec3(1.0) - kS;
+  kD *= 1.0 - metallic;
 
-  for (int i = 0; i < 4; i++) {
-    vec3 lightPosition = lightPositions[i];
-    vec3 lightColor = lightColors[i];
-    vec3 L = normalize(lightPosition - vPosition);
-    vec3 H = normalize(V + L);
-    float distance = length(lightPosition - vPosition);
-    float attenuation = 1.0 / (distance * distance);
-    vec3 radiance = lightColor * attenuation;
-    
-    // cook-torrance brdf
-    float NDF = DistributionGGX(N, H, roughness);
-    float G = GeometrySmith(N, V, L, roughness);      
-    vec3 F = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
-    
-    vec3 kS = F;
-    vec3 kD = vec3(1.0) - kS;
-    kD *= 1.0 - metallic;
+  vec3 irradiance = irradianceSH(N);
+  vec3 diffuse = irradiance * albedo;
 
-    vec3 irradiance = irradianceSH(N);
-    vec3 diffuse = irradiance * albedo;
+  const float MAX_REFLECTION_LOD = 4.0;
+  vec3 prefilteredColor = textureLod(environmentMap, R,  roughness * MAX_REFLECTION_LOD).rgb;   
+  vec2 envBRDF  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+  vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
 
-    const float MAX_REFLECTION_LOD = 4.0;
-    vec3 prefilteredColor = textureLod(environmentMap, R,  roughness * MAX_REFLECTION_LOD).rgb;   
-    vec2 envBRDF  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
-    vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
+  vec3 ambient = (kD * diffuse + specular) * 1.; 
 
-    vec3 ambient = (kD * diffuse + specular) * 1.; 
-
-    float NdotL = max(dot(N, L), 0.0);                
-    Lo += (kD * albedo / PI + specular) * radiance * NdotL;    
-  }
-
-  vec3 ambient = irradianceSH(N);
-  vec3 color = ambient + Lo;
+  vec3 color = ambient;
 
   color = color / (color + vec3(1.0));
   color = pow(color, vec3(1.0/2.2));
