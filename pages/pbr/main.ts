@@ -12,7 +12,7 @@ import {
 import '@babylonjs/loaders/glTF';
 import { importMeshes } from '../../utils/babylon';
 import modelPath from './tricanaOfCoimbra.glb';
-import environmentPath from './environment4.env';
+import environmentPath from './environment.env';
 import { resizeCanvasToDisplaySize } from '../../utils/webgl';
 import pbrVertexShader from './shaders/pbr.vertex.glsl?raw';
 import pbrFragmentShader from './shaders/pbr.fragment.glsl?raw';
@@ -44,7 +44,7 @@ const lights = [
 
 const lightColors = [
   [0.6, 0.1, 0.1],
-  [0.1, 0.6, 0.1],
+  [0.1, 0.6, 0.9],
   [1, 1, 1],
   [1, 1, 1],
 ]

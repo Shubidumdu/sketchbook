@@ -87,9 +87,9 @@ void main(void){
   
   vec3 Lo = vec3(0.0);
  
-  for (int i=0; i < 4; ++i) {
+  for (int i = 0; i < 4; ++i) {
     vec3 lightPosition = lightPositions[i];
-    vec3 L = normalize(lightPositions[i] - vPosition);
+    vec3 L = normalize(lightPosition - vPosition);
     vec3 H = normalize(V + L);
     float distance = length(lightPosition - vPosition);
     float attenuation = 1.0 / (distance * distance);
