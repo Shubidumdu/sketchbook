@@ -114,7 +114,6 @@ const makeShaderMaterial = () => {
     attributes: ['position', 'normal', 'color'],
     uniforms: ['world', 'view', 'worldView', 'worldViewProjection'],
   });
-
   return material;
 };
 
