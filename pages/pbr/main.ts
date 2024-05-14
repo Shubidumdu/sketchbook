@@ -22,6 +22,9 @@ const roughnessInput = document.getElementById('roughness') as HTMLInputElement;
 
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 const engine = new Engine(canvas, true);
+
+engine.displayLoadingUI();
+
 const scene = new Scene(engine);
 const envTexture = CubeTexture.CreateFromPrefilteredData(
   environmentPath,
@@ -32,8 +35,6 @@ scene.createDefaultSkybox(envTexture);
 
 Effect.ShadersStore['pbrVertexShader'] = pbrVertexShader;
 Effect.ShadersStore['pbrFragmentShader'] = pbrFragmentShader;
-
-engine.displayLoadingUI();
 
 const lights = [
   new PointLight('light', new Vector3(4, 5, -1)),
