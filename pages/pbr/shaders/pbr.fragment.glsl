@@ -82,7 +82,7 @@ void main(void){
   vec3 V=normalize(cameraPosition - vPosition);
   vec3 R = reflect(-V, N);
 
-  vec3 F0=vec3(0.95, 0.64, 0.54);
+  vec3 F0=vec3(0.04);
   F0=mix(F0, albedo, metallic);
   
   vec3 Lo = vec3(0.0);
