@@ -68,8 +68,6 @@ const init = async () => {
   const [root, ...restMeshes] = await importMeshes(modelPath);
   const customMaterial = makeShaderMaterial();
 
-  envTexture.sphericalPolynomial?.preScaledHarmonics.convertIncidentRadianceToIrradiance();
-
   customMaterial.setArray3(
     'sphericalHarmonics',
     [
