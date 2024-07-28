@@ -1,3 +1,7 @@
 # Sketch Book
 
-그냥 캔버스에 그리고 싶은 거 그리는 스케치북
+Just sketchbook for drawing what i want.
+
+Some projects use the WebGPU API, so they may not display properly depending on your device and browser environment.
+
+![alt text](image.png)
