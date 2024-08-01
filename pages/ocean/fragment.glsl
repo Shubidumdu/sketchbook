@@ -5,6 +5,8 @@ precision highp float;
 out vec4 outColor;
 uniform vec2 u_resolution;
 uniform float u_time;
+uniform vec3 u_color1;
+uniform vec3 u_color2;
 
 float random(in vec2 st){
   return fract(sin(dot(st.xy,
@@ -71,8 +73,8 @@ void main(){
   vec2 st=gl_FragCoord.xy/u_resolution.xy;
   st.x*=u_resolution.x/u_resolution.y;
   vec3 color=vec3(.0);
-  vec3 p1=f1(st*.1)*vec3(1.,.9176,.8+.2*st.y);
-  vec3 p2=f2(st*.25)*vec3(.6853+.2*(1.-st.y),.9137,1.);
+  vec3 p1=f1(st*.1)*(u_color1 + vec3(0., 0., .2*st.y));
+  vec3 p2=f2(st*.25)*(u_color2 + vec3(.2*(1.-st.y), 0., 0.));
   color=mix(p1,p2,.5);
   outColor=vec4(color,1.);
 }
