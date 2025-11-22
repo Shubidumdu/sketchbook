@@ -19,13 +19,13 @@
     "vite": "^4.3.9"
   },
   "dependencies": {
-    "@babylonjs/core": "^7.6.0",
-    "@babylonjs/gui": "^7.6.0",
-    "@babylonjs/gui-editor": "^7.6.0",
-    "@babylonjs/inspector": "^7.6.0",
-    "@babylonjs/loaders": "^7.6.0",
-    "@babylonjs/materials": "^7.6.0",
-    "@babylonjs/serializers": "^7.6.0",
+    "@babylonjs/core": "^8.38.0",
+    "@babylonjs/gui": "^8.38.0",
+    "@babylonjs/gui-editor": "^8.38.0",
+    "@babylonjs/inspector": "^8.38.0",
+    "@babylonjs/loaders": "^8.38.0",
+    "@babylonjs/materials": "^8.38.0",
+    "@babylonjs/serializers": "^8.38.0",
     "pixi.js": "^7.3.1",
     "pure-rand": "^6.0.4",
     "simplex-noise": "^4.0.1"
